@@ -144,9 +144,6 @@
   <ItemGroup>
     <ClCompile Include="LAB1.C" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="LAB1.H" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

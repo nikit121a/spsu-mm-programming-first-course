@@ -3,7 +3,12 @@
 #include <string.h>
 #include <math.h>
 
-#include "LAB1.H"
+#define LEN_INT sizeof(int) * 8
+#define LEN_FLOAT sizeof(float) * 8
+#define LEN_DOUBLE sizeof(double) * 8
+#define LEN_LONG sizeof(long long) * 8
+#define STANDART_FLOAT  32
+#define STANDART_DOUBLE 64
 
 
 

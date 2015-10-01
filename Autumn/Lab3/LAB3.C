@@ -38,7 +38,7 @@ int main(void)
 		n = scanf("%lf %lf  %lf", &a, &b, &c);
 	}
 		if (a <= 0 || b <= 0 || c <= 0)
-		printf("\nSides of tiangle must be greater than zero!!");
+		printf("\nSides of triangle must be greater than zero!!");
 	else
 	{
 		if((a < b + c) && (c < a + b) && (b < a + c))

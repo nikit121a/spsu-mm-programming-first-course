@@ -33,20 +33,35 @@ int main (void)
 	int n;
 
 	printf("Input 3 numbers:");
-	n = scanf("%d %d %d", &num1, &num2, &num3);
+	n = scanf("%i %i %i", &num1, &num2, &num3);
+	if (n == 3)
+	{
+		/*searching for maximum number*/
+		if (num1 > num2)
+			swap(&num1, &num2);
+		if (num2 > num3)
+			swap(&num2, &num3);
+		if (num3 <= 0 || num2 <= 0 || num1 <= 0)
+			n = 0;
+	}
 	while (n < 3)
 	{
 		printf("\nIncorrect representation format.\nInput 3 numbers:");
 		scanf("%*[^\n]");
 		scanf("%*c");
-		n = scanf("%d %d %d", &num1, &num2, &num3);
+		n = scanf("%i %i %i", &num1, &num2, &num3);
+		if (n >= 3)
+		{
+			/*searching for maximum number*/
+			if (num1 > num2)
+				swap(&num1, &num2);
+			if (num2 > num3)
+				swap(&num2, &num3);
+			if (num3 <= 0 || num2 <= 0 || num1 <= 0)
+				n = 0;
+		}
 	}
-	/*searching for maximum number*/
-	if (num1 > num2)
-		swap(&num1, &num2);
-	if(num2 > num3)
-		swap(&num2, &num3);
-
+	
 	x = num1, y = num2,	z = num3;
 	if(x * x + y * y == z * z)
 	{
@@ -60,7 +75,7 @@ int main (void)
 	}
 	else
 		printf("\n This is not the Pythagorean numbers");
-	_getch();
 	printf("Press any key to exit");
+	_getch();
 	return 0;
 }
