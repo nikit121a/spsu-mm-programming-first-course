@@ -10,7 +10,7 @@ int n = 9, m = 12;
 
 
 
-void fill_d(int* p, int cur_p, int cur_next_p, int nn)
+void fill_d(int* p, int cur_p, int cur_next_p)
 {
 
 	if(cur_p * 2 == base - 1) 
@@ -39,40 +39,40 @@ void fill_d(int* p, int cur_p, int cur_next_p, int nn)
 		(base / 3) % 3 == 0 &&
 		(cur_next_p / (q * 3)) % 3 == 0)
 	{
-		fill_d(p, cur_p + q + q * 3, cur_next_p + q * 3, nn);
+		fill_d(p, cur_p + q + q * 3, cur_next_p + q * 3);
 	}
 
 	if(q < base / 3 &&			//2
 		(variable_p / 3) % 3 == 0 &&
 		(cur_next_p / q) % 3 == 0)
 	{
-		fill_d(p, cur_p + q + q * 3, cur_next_p + q, nn);
+		fill_d(p, cur_p + q + q * 3, cur_next_p + q);
 	}
 
 	if(q > 1 &&			//3
 		(cur_next_p / (q / 3)) % 3 == 0 &&
 		(cur_next_p / q) % 3 == 0)
 	{
-		fill_d(p, cur_p + q, cur_next_p + q + q / 3, nn);
+		fill_d(p, cur_p + q, cur_next_p + q + q / 3);
 	}
 
 	if(q < base / 3 &&			//4
 		(cur_next_p / (q * 3)) % 3 == 0 &&
 		(cur_next_p / q) % 3 == 0)
 	{
-		fill_d(p, cur_p + q, cur_next_p + q * 3 + q, nn);
+		fill_d(p, cur_p + q, cur_next_p + q * 3 + q);
 	}
 
 	if(q < base / 9 &&			//5
 		(variable_p / 3) % 3 == 0 &&
 		(variable_p / 9) % 3 == 0)
 	{
-		fill_d(p, cur_p + q + q * 3 + q * 9, cur_next_p, nn);
+		fill_d(p, cur_p + q + q * 3 + q * 9, cur_next_p);
 	}
 
 	if((cur_next_p / q) % 3 == 0)			//6
 	{
-		fill_d(p, cur_p + q, cur_next_p + 2 * q, nn);
+		fill_d(p, cur_p + q, cur_next_p + 2 * q);
 	}
 
 	return;
@@ -104,7 +104,7 @@ int main()
 			cur_q *= 3;
 			cur_i /= 3;
 		}
-		fill_d(&i, cur_p, cur_next_p, q);
+		fill_d(&i, cur_p, cur_next_p);
 	}
 
 	for (int i = 0; i <= m; i++)
@@ -145,6 +145,7 @@ int main()
 	printf("Answer: %llu\n", a[m][0]);
 
 	_getch();
-	free(a);
+	for (int i = 0; i < m + 1; i++)
+		free(a[i]);
 	return 0;
 }
