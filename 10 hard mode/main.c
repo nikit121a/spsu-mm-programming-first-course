@@ -147,8 +147,6 @@ int main()
 	_getch();
 	for (int i = 0; i < m + 1; i++)
 		free(a[i]);
-	free(value);
-	free(next);
-	free(head);
+	free(a);
 	return 0;
 }
