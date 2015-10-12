@@ -1,122 +1,121 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#pragma comment(linker, "/STACK:1000000000")
 
-#define osn 19683
+#define base 19683
 #define int long long
 
-int head[osn], value[100 * osn], next[100 * osn], h = 0;
-int n = 9, m = 12, ed = osn;
+int head[base], value[100 * base], next[100 * base], h = 0;
+int n = 9, m = 12;
 
 
 
-int tmt(int* p, int cur_p, int cur_np, int nn)
+void fill_d(int* p, int cur_p, int cur_next_p, int nn)
 {
 
-	if(cur_p * 2 == osn - 1)
+	if(cur_p * 2 == base - 1) 
 	{
 		h++;
-		next[h] = head[cur_np];
+		next[h] = head[cur_next_p];
 		value[h] = *p;
-		head[cur_np] = h;
-		return 0;
+		head[cur_next_p] = h;
+		return;
 	}
 
-	int q = 1, chp = cur_p, count = 0;
+	int q = 1, variable_p = cur_p, count = 0;
 
 	while (count < n)
 	{
-		if(chp % 3 == 0)
+		if(variable_p % 3 == 0)
 		{
 			break;
 		}
-		chp /= 3;
+		variable_p /= 3;
 		q *= 3;
 		count++;
 	}
 
-	if(q < osn / 3 &&			//1
-		(chp / 3) % 3 == 0 &&
-		(cur_np / (q * 3)) % 3 == 0)
+	if(q < base / 3 &&			//1
+		(base / 3) % 3 == 0 &&
+		(cur_next_p / (q * 3)) % 3 == 0)
 	{
-		tmt(p, cur_p + q + q * 3, cur_np + q * 3, nn);
+		fill_d(p, cur_p + q + q * 3, cur_next_p + q * 3, nn);
 	}
 
-	if(q < osn / 3 &&			//2
-		(chp / 3) % 3 == 0 &&
-		(cur_np / q) % 3 == 0)
+	if(q < base / 3 &&			//2
+		(variable_p / 3) % 3 == 0 &&
+		(cur_next_p / q) % 3 == 0)
 	{
-		tmt(p, cur_p + q + q * 3, cur_np + q, nn);
+		fill_d(p, cur_p + q + q * 3, cur_next_p + q, nn);
 	}
 
 	if(q > 1 &&			//3
-		(cur_np / (q / 3)) % 3 == 0 &&
-		(cur_np / q) % 3 == 0)
+		(cur_next_p / (q / 3)) % 3 == 0 &&
+		(cur_next_p / q) % 3 == 0)
 	{
-		tmt(p, cur_p + q, cur_np + q + q / 3, nn);
+		fill_d(p, cur_p + q, cur_next_p + q + q / 3, nn);
 	}
 
-	if(q < osn / 3 &&			//4
-		(cur_np / (q * 3)) % 3 == 0 &&
-		(cur_np / q) % 3 == 0)
+	if(q < base / 3 &&			//4
+		(cur_next_p / (q * 3)) % 3 == 0 &&
+		(cur_next_p / q) % 3 == 0)
 	{
-		tmt(p, cur_p + q, cur_np + q * 3 + q, nn);
+		fill_d(p, cur_p + q, cur_next_p + q * 3 + q, nn);
 	}
 
-	if(q < osn / 9 &&			//5
-		(chp / 3) % 3 == 0 &&
-		(chp / 9) % 3 == 0)
+	if(q < base / 9 &&			//5
+		(variable_p / 3) % 3 == 0 &&
+		(variable_p / 9) % 3 == 0)
 	{
-		tmt(p, cur_p + q + q * 3 + q * 9, cur_np, nn);
+		fill_d(p, cur_p + q + q * 3 + q * 9, cur_next_p, nn);
 	}
 
-	if((cur_np / q) % 3 == 0)			//6
+	if((cur_next_p / q) % 3 == 0)			//6
 	{
-		tmt(p, cur_p + q, cur_np + 2 * q, nn);
+		fill_d(p, cur_p + q, cur_next_p + 2 * q, nn);
 	}
 
-	return 0;
+	return;
 }
 
 int main()
 {
 
-	long long ** a = (long long**)malloc(sizeof(long long) * (m + 1));
+	long long ** a = (long long**)malloc(sizeof(long long) * (m + 1)); //create
 	for (int i = 0; i <= m; i++)
 	{
-		a[i] = (long long*)malloc(sizeof(long long) * osn);
+		a[i] = (long long*)malloc(sizeof(long long) * base);
 	}
 
-	for (int i = 0; i < osn; i++)
+	for (int i = 0; i < base; i++) //basic val
 	{
 		head[i] = -1;
 	}
 
-	int q = osn / 3;
+	int q = base / 3;
 
- 	for (int i = 0; i < ed; i++)
+ 	for (int i = 0; i < base; i++)  //fill d
 	{
-		int cur_np = 0, cur_i = i, g = 1, cur_p = 0;
+		int cur_next_p = 0, cur_i = i, cur_q = 1, cur_p = 0;
 		while (cur_i > 0)
 		{
-			cur_np += ((cur_i % 3) / 2) * g;
-			cur_p += ((cur_i % 3) - (cur_i % 3) / 2) * g;
-			g *= 3;
+			cur_next_p += ((cur_i % 3) / 2) * cur_q;
+			cur_p += ((cur_i % 3) - (cur_i % 3) / 2) * cur_q;
+			cur_q *= 3;
 			cur_i /= 3;
 		}
-		tmt(&i, cur_p, cur_np, q);
+		fill_d(&i, cur_p, cur_next_p, q);
 	}
 
 	for (int i = 0; i <= m; i++)
 	{
-		for (int j = 0; j < osn; j++)
+		for (int j = 0; j < base; j++)
 		{
 			a[i][j] = 0;
 		}
 	}
 
-	for (int i = 0; i < osn; i++)
+	for (int i = 0; i < base; i++) //fill 1 row
 	{
 		int cur_h = head[i];
 		while (cur_h > -1)
@@ -129,10 +128,10 @@ int main()
 		}
 	}
 
-
-	for (int i = 2; i <= m; i++)
+	 
+	for (int i = 2; i <= m; i++) //main "for"
 	{
-		for (int j = 0; j < osn; j++)
+		for (int j = 0; j < base; j++)
 		{
 			int cur_h = head[j];
 			while (cur_h > -1)
@@ -146,5 +145,6 @@ int main()
 	printf("Answer: %llu\n", a[m][0]);
 
 	_getch();
+	free(a);
 	return 0;
 }
