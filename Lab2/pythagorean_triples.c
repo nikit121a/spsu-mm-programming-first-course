@@ -3,7 +3,7 @@
 
 #define EPS 0.000001
 
-int gcd(int u, int v) //using Stein's binary GCD algorithm
+int gcd(int u, int v) // using Stein's binary GCD algorithm
 {
   int shift;
 
@@ -60,7 +60,9 @@ int main()
 	{
 		printf("%d, %d, %d is not a Pythogorean triple.\n",a, b, c);
 	}
+
 	getchar();
 	getchar();
+	
 	return 0;
 }
