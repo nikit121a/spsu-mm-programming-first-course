@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{F9D48310-58EF-4ED1-8745-644F6D261A02}</ProjectGuid>
-    <RootNamespace>tromino</RootNamespace>
+    <ProjectGuid>{6AB3A739-90A6-4837-BF54-EB7C930D8014}</ProjectGuid>
+    <RootNamespace>hash</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
