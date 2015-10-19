@@ -2,10 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define osn 31
 #define max_chain 5
 #define s_length 256
-#define table_size 17390
+#define table_size 37813
 #define edge_chain 2
 
 int base_list[11] = {7, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71};
