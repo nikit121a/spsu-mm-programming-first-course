@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define max_chain 5
-#define s_length 256
+#define max_chain 50
+#define key_length 25
+#define val_length 150
 #define table_size 37813
 #define edge_chain 2
 
@@ -11,15 +12,15 @@ int base_list[11] = {7, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71};
 int cur_base = 0, last_correct_base = 0;
 
 
-long long hash(char s[s_length])
+int hash(char key[key_length])
 {
 	/*hash[s] = s[0] + s[1] * p + s[2] * p^2...*/
 	long long result = 0, cur_p = 1;
 	int i = 0;
 
-	while (s[i] > 0)
+	while (key[i] > 0)
 	{
-		result = (result + (s[i] * cur_p) % table_size) % table_size;
+		result = (result + (key[i] * cur_p) % table_size) % table_size;
 		cur_p *= base_list[cur_base];
 		i++;
 	}
@@ -38,21 +39,30 @@ short is_correct(int* chain_size, int l, int r) // table validation
 	return 1;
 }
 
-void put_in_table(char** hash_table, int* chain_size, char cur_s[s_length], int hash)
+void put_in_table(char** hash_table, char** val_table, int* chain_size, char cur_key[key_length], int hash, char cur_val[val_length])
 {
 	
-	for (int i = 0; i < s_length; i++)
+	for (int i = 0; i < key_length; i++)
 	{
-		hash_table[hash][chain_size[hash] * s_length + i] = cur_s[i];
+		hash_table[hash][chain_size[hash] * key_length + i] = cur_key[i];
+	}
+
+
+	for (int i = 0; i < val_length; i++)
+	{
+		val_table[hash][chain_size[hash] * val_length + i] = cur_val[i];
 	}
 	chain_size[hash] ++;
 
 	return;
 }
 
-void table_rebalance(char** hash_table, int* chain_size) 
+void table_rebalance(char** hash_table, char** val_table, int* chain_size) 
 {
-	char* buffer = (char*)malloc(sizeof(char[s_length]) * table_size * (max_chain + 1) + 1);
+	char* buffer_val = (char*)malloc(sizeof(char[val_length]) * table_size * (max_chain + 1) + 1);
+
+	char* buffer_key = (char*)malloc(sizeof(char[key_length]) * table_size * (max_chain + 1) + 1);
+
 	int buffer_head = 0;
 
 
@@ -61,7 +71,7 @@ void table_rebalance(char** hash_table, int* chain_size)
 		/* means that all hashes cause collisions*/
 		cur_base = last_correct_base - 1;
 		printf("Rebalance is impossible, back to the inital base\n");
-		table_rebalance(hash_table, chain_size);
+		table_rebalance(hash_table, val_table, chain_size);
 		return;
 	}
 
@@ -70,9 +80,14 @@ void table_rebalance(char** hash_table, int* chain_size)
 		/*puts all data in the buffer*/
 		if(chain_size[i] > 0)
 		{
-			for (int j = 0; j <= chain_size[i] * s_length; j++)
+			for (int j = 0; j <= chain_size[i] * key_length; j++)
 			{
-				buffer[j + buffer_head * s_length] = hash_table[i][j];
+				buffer_key[j + buffer_head * key_length] = hash_table[i][j];
+			}
+
+			for (int j = 0; j <= chain_size[i] * val_length; j++)
+			{
+				buffer_val[j + buffer_head * val_length] = val_table[i][j];
 			}
 			buffer_head += chain_size[i];
 		}
@@ -85,12 +100,20 @@ void table_rebalance(char** hash_table, int* chain_size)
 	for (int i = 0; i < buffer_head; i++)
 	{
 		/*puts all data back in table with new hashes*/
-		char cur_s[s_length];
-		for (int j = i * s_length; j < (i + 1) * s_length; j++)
+
+		char cur_key[key_length];
+		char cur_val[val_length];
+
+		for (int j = i * key_length; j < (i + 1) * key_length; j++)
 		{
-			cur_s[j - i * s_length] = buffer[j];
+			cur_key[j - i * key_length] = buffer_key[j];
 		}
-		put_in_table(hash_table, chain_size, cur_s, hash(&cur_s));
+
+		for (int j = i * val_length; j < (i + 1) * val_length; j++)
+		{
+			cur_val[j - i * val_length] = buffer_val[j];
+		}
+		put_in_table(hash_table, val_table, chain_size, cur_key, hash(cur_key), cur_val);
 	}
 
 	if(!is_correct(chain_size, 0, table_size) &&
@@ -98,36 +121,37 @@ void table_rebalance(char** hash_table, int* chain_size)
 	{
 		/*If rebalance did not help*/
 		printf("Rebalance with base %d has failed. Trying  another base...\n", base_list[cur_base]);
-		table_rebalance(hash_table, chain_size);
+		table_rebalance(hash_table, val_table, chain_size);
 		return;
 	}
 	last_correct_base = cur_base;
 	printf("Table was rebalanced, base for hash: %d\n", base_list[cur_base]);
-	free(buffer);
+	free(buffer_key);
+	free(buffer_val);
 }
 
 
 void remove_from_table(char** hash_table, int* chain_size, int s_pos, int hash)
 {
 	/*function "find_string" returns position of the string, so it's easy to remove the string*/
-	for (int i = (s_pos - 1) * s_length; i < (chain_size[hash]) * s_length; i++)
+	for (int i = (s_pos - 1) * key_length; i < (chain_size[hash]) * key_length; i++)
 	{
-		hash_table[hash][i] = hash_table[hash][i + s_length];
+		hash_table[hash][i] = hash_table[hash][i + key_length];
 	}
 	chain_size[hash]--;
 	return;
 }
 
-int find_string(char** hash_table, int* chain_size, char cur_s[s_length], int hash)
+int find_key(char** hash_table, int* chain_size, char cur_key[key_length], int hash)
 {
 	/*Tries to find string in table*/
 	int result = 0;
 	for (int i = 0; i < chain_size[hash]; i++)
 	{
 		int cur_res = 1;
-		for (int j = 0; j < 256; j++)
+		for (int j = 0; j < key_length; j++)
 		{
-			if(hash_table[hash][i * s_length + j] != cur_s[j])
+			if(hash_table[hash][i * key_length + j] != cur_key[j])
 			{
 				cur_res = 0;
 			}
@@ -140,14 +164,31 @@ int find_string(char** hash_table, int* chain_size, char cur_s[s_length], int ha
 	return result;
 }
 
+void print_val(char** val_table,int hash,int num)
+{
+	int i = val_length * (num - 1); 
+	printf("Value: ");
+	while (val_table[hash][i] != 0)
+	{
+		printf("%c", val_table[hash][i]);
+		i++;
+	}
+	printf("\n");
+}
+
 
 int main()
 {
 	char** hash_table = (char**)malloc(sizeof(char*) * (table_size + 1));
+	char** val_table = (char**)malloc(sizeof(char*) * (table_size + 1));
+
 	for (int i = 0; i < table_size; i++)
 	{
-		hash_table[i] = (char*)malloc(sizeof(char[s_length]) * (max_chain + 1));
-		memset(hash_table[i], 0, sizeof(char[s_length]) * (max_chain + 1));
+		hash_table[i] = (char*)malloc(sizeof(char[key_length]) * (max_chain + 1));
+		val_table[i] = (char*)malloc(sizeof(char[val_length]) * (max_chain + 1));
+
+		memset(val_table[i], 0, sizeof(char[val_length]) * (max_chain + 1));
+		memset(hash_table[i], 0, sizeof(char[key_length]) * (max_chain + 1));
 	}
 
 	int* chain_size = (int*)malloc(sizeof(int) * (table_size + 1));
@@ -163,41 +204,51 @@ int main()
 		scanf("%d", &action_num);
 		scanf("%*[^\n]");
 
-		char cur_s[s_length * 2];
-		memset(cur_s, 0, s_length * 2);
+		char cur_val[val_length * 2];
+		memset(cur_val, 0, val_length * 2);
+
+		char cur_key[key_length * 2];
+		memset(cur_key, 0, key_length * 2);
 
 		if(action_num == 1 || action_num == 2 || action_num == 3)
 		{
+			printf("Input the key: ");
+			scanf("%s", &cur_key);
+		}
+
+		if (action_num == 1)
+		{
+			scanf("%*[^\n]");
 			printf("Input the string: ");
-			scanf("%s", &cur_s);
+			scanf("%s", &cur_val);
 		}
 
 		switch (action_num)
 		{
 		case 1: 
-			put_in_table(hash_table, chain_size, cur_s, hash(cur_s));
-			if(!is_correct(chain_size, hash(cur_s), hash(cur_s))) 
+			put_in_table(hash_table, val_table, chain_size, cur_key, hash(cur_key), cur_val);
+			if(!is_correct(chain_size, hash(cur_key), hash(cur_key))) 
 			{
 				printf("Table has to be rebalanced. Please, wait...\n");
-				table_rebalance(hash_table, chain_size);
+				table_rebalance(hash_table, val_table, chain_size);
 			}
 			printf("The string was successfully added.\n");
 			break;
 		case 2:
-			if(find_string(hash_table, chain_size, cur_s, hash(cur_s)))
+			if(find_key(hash_table, chain_size, cur_key, hash(cur_key)))
 			{
-				remove_from_table(hash_table, chain_size, find_string(hash_table, chain_size, cur_s, hash(cur_s)), hash(cur_s));
+				remove_from_table(hash_table, chain_size, find_key(hash_table, chain_size, cur_key, hash(cur_key)), hash(cur_key));
 				printf("String was successfully removed.\n");
 			}
 			else
 			{
-				printf("There is no such string in the table.\n");
+				printf("There is such hash in the table.\n");
 			}
 			break;
 		case 3:
-			if(find_string(hash_table, chain_size, cur_s, hash(cur_s)))
+			if(find_key(hash_table, chain_size, cur_key, hash(cur_key)))
 			{
-				printf("The table contains this string.\n");
+				print_val(val_table, hash(cur_key), find_key(hash_table, chain_size, cur_key, hash(cur_key)));
 			}
 			else
 			{
