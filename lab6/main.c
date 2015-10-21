@@ -258,7 +258,7 @@ int main()
 		case 4:
 			break;
 		default:
-			printf("Please, input the valid key.\n");
+			printf("Please, choose correctly.\n");
 			break;
 		}
 		
