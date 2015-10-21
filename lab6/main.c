@@ -199,7 +199,7 @@ int main()
 	while (action_num != 4) 
 	{
 		
-		printf("\nInput the key(1 - add, 2 - remove, 3 - check, 4 - exit): ");
+		printf("\nChoose the operation(1 - add, 2 - remove, 3 - check, 4 - exit): ");
 		action_num = -1;
 		scanf("%d", &action_num);
 		scanf("%*[^\n]");
