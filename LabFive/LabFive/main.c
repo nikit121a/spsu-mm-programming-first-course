@@ -11,15 +11,15 @@ int period_length(int n)
 	int a;								//new integer part 
 	int b, c, b_0, c_0;					//auxiliary variables for calculating integers								
 	int result = 0;
-	a_0 = sqrt(n*1.0);
+	a_0 = sqrt(n * 1.0);
 	b = b_0 = a_0;
-	c = c_0 = n - a_0*a_0;
+	c = c_0 = n - a_0 * a_0;
 	do
 	{
 		a = (a_0 + b) / c;
 		printf_s("%d\n", a);
-		b = a*c - b;
-		c = (n - b*b) / c;
+		b = a * c - b;
+		c = (n - b * b) / c;
 		result++;
 	} while ((b != b_0) || (c != c_0));
 	printf_s("Period: %d \n", result);
@@ -48,7 +48,7 @@ int main()
 	int n;
 	printf_s("Enter the number\n");
 	scanf_s("%d", &n);
-	n=check(n);
+	n = check(n);
 	printf_s("Numbers: \n");
 	period_length(n);
 
