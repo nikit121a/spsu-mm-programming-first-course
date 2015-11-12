@@ -70,6 +70,21 @@ int DecToBin(int s)
 		printf_s("0");
 	}
 
+	printf_s("\n");
+	printf_s("A negative floating point number of double precision:\n");
+	int o = 1023 + c - 1;
+	printf_s("1");
+	taskB(o);
+	for (i = 64 - c + 1; i < 64; i++)
+	{
+		printf_s("%i", a[i]);
+	}
+	for (i = 51 - c; i >= 0; i--)
+	{
+		printf_s("0");
+	}
+	printf_s("\n");
+
 
 	for (i = 0; i < 64; i++)
 	{
@@ -105,20 +120,6 @@ int DecToBin(int s)
 
 	}
 
-	printf_s("\n");
-	printf_s("A negative floating point number of double precision:\n");
-	int o = 1023 + c - 1;
-	printf_s("1");
-	taskB(o);
-	for (i = 64 - c + 1; i < 64; i++)
-	{
-		printf_s("%i", a[i]);
-	}
-	for (i = 51 - c; i >= 0; i--)
-	{
-		printf_s("0");
-	}
-	printf_s("\n");
 
 	printf_s("Negative 32-bit integer\n");
 	for (i = 32; i <64; i++)

@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Lab One.c" />
+    <ClCompile Include="Lab_One.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C8BC1AAA-BBF8-4FC9-ADA1-B7CD737EF150}</ProjectGuid>

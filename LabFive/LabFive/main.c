@@ -27,7 +27,19 @@ int period_length(int n)
 }
 
 int check(int a)
+
 {
+	while (sqrt(a) == int(sqrt(a)))
+	{
+		printf_s("Wrong number\n");
+		printf_s("Enter positive number:\n");
+		while (getchar() != '\n')
+		{
+			continue;
+		}
+		scanf_s("%i", &a);
+	}
+
 	while (a <= 0)
 	{
 		printf_s("Wrong number\n");
@@ -38,6 +50,7 @@ int check(int a)
 		}
 		scanf_s("%i", &a);
 	}
+
 	return a;
 }
 
