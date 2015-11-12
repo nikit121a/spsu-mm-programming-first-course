@@ -25,14 +25,14 @@ void get_color(int x, int y, int *r, int *g, int *b, long W, long H, unsigned ch
 	}
 	if(mode == 24)
 	{
-		num = 3 * W * (H - y) + 3 * x;
+		num = 3 * W * (H - y - 1) + 3 * x;
 		*b = pic_in[num + 0];
 		*g = pic_in[num + 1];
 		*r = pic_in[num + 2];
 	}
 	if(mode == 32)
 	{
-		num = 4 * W * (H - y) + 4 * x;
+		num = 4 * W * (H - y - 1) + 4 * x;
 		*b = pic_in[num + 1];
 		*g = pic_in[num + 2];
 		*r = pic_in[num + 3];
@@ -53,7 +53,7 @@ void set_color(int x, int y, int r, int g, int b, long W, long H, unsigned char 
 	}
 	if(mode == 24)
 	{
-		num = 3 * W * (H - y) + 3 * x;
+		num = 3 * W * (H - y - 1) + 3 * x;
 
 		pic_out[num + 0] = b;
 		pic_out[num + 1] = g;
@@ -61,7 +61,7 @@ void set_color(int x, int y, int r, int g, int b, long W, long H, unsigned char 
 	}
 	if(mode == 32)
 	{
-		num = 4 * W * (H - y) + 4 * x;
+		num = 4 * W * (H - y - 1) + 4 * x;
 
 		pic_out[num + 0] = 0;
 		pic_out[num + 1] = b;
@@ -82,7 +82,7 @@ void gauss(long W, long H, unsigned char *pic_in, unsigned char *pic_out)
 	int mask[3][3] = { { 1, 2, 1 },{ 2, 4, 2 },{ 1, 2, 1 } };
 	int resR, resG, resB;
 
-	for (y = 1; y <= H - 1; y++)
+	for (y = 1; y < H - 1; y++)
 		for (x = 1; x < W - 1; x++)
 		{
 			resR = 0, resG = 0, resB = 0;
@@ -108,7 +108,7 @@ void median(long W, long H, unsigned char *pic_in, unsigned char *pic_out)
 	int x, y, i, j;
 	int mas[9];
 
-	for (y = 1; y < H - 1; y++)
+	for (y = 1; y < H - 1 ; y++)
 		for (x = 1; x < W - 1; x++)
 		{
 			for (i = -1; i < 2; i++)
@@ -134,8 +134,8 @@ void median(long W, long H, unsigned char *pic_in, unsigned char *pic_out)
 int gray(long W, long H, unsigned char *pic_in, unsigned char *pic_out)
 {
 	int x, y;
-	for (y = 1; y < H; y++)
-		for (x = 1; x < W; x++)
+	for (y = 1; y < H - 1; y++)
+		for (x = 1; x < W - 1; x++)
 		{
 			int b, g, r, color;
 
@@ -154,8 +154,8 @@ void sobel(int mode, long W, long H, unsigned char *pic_in, unsigned char *pic_o
 	int resX, resY;
 	int lim = 100;
 
-	for (y = 1; y <= H - 1; y++)
-		for (x = 1; x < W - 1; x++)
+	for (y = 1; y < H - 1; y++)
+		for (x = 1; x < W - 1 ; x++)
 		{
 			resX = 0;
 			resY = 0;
