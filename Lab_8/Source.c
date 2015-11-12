@@ -1,12 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <stdlib.h>
 #include <math.h>
 
-#define BUF_SIZE 12
+#define BUF_SIZE 6
 
-/* Читает double из консоли, возвращет 0 в случае успеха */
 int read_double(double *value)
 {
 	int length = 0;
@@ -43,12 +40,7 @@ int read_double(double *value)
 			printf("Error: not integer.\n");
 			return 1;
 		}
-		if (sqrt(*value) == floor(sqrt(*value)))
-		{
-			printf("Error: square root is rational.\n");
-			return 1;
-		}
-		if (*value<=0)
+		if (*value <= 0)
 		{
 			printf("Error: not positive.\n");
 			return 1;
@@ -69,31 +61,43 @@ int read_double(double *value)
 
 int main()
 {
-	int a_0, a, b, c, b_0, c_0, period = 0;
-	double n;
-	printf("The program finds the period of the continued fraction of the \nsquare root integer you entered.\n");
+	int value[8], N[8][10000], i, j;
+	double x;
 
-	while (read_double(&n))
+	printf("The program calculates the number of ways to change the amount you entered \n");
+	printf("pence coins in denominations of 1, 2, 5, 10, 20, 50, 100, 200 pence.\n");
+
+	for (int i = 0; i < 8; i++)
+		for (int j = 0; j < 10000; j++)
+		{
+			if (i*j == 0)
+				N[i][j] = 1;
+			else
+				N[i][j] = 0;
+		}
+
+	value[0] = 1;
+	value[1] = 2;
+	value[2] = 5;
+	value[3] = 10;
+	value[4] = 20;
+	value[5] = 50;
+	value[6] = 100;
+	value[7] = 200;
+
+	while (read_double(&x))
 		printf("Please, try again\n");
 
-	printf("Period: \n");
-	a_0 = sqrt(n);
-	b = b_0 = a_0;
-	c = c_0 = n - a_0*a_0;
-	do
-	{
-		a = (a_0 + b) / c;
-		b = a*c - b;
-		c = (n - b*b) / c;
-		period++;
-		printf("%d ", a);
-	} 
-	while
-		((b != b_0) || (c != c_0));
+	for (i = 1; i < 8; i++)
+		for (j = 1; j <= x; j++)
+		{
+			if (j < value[i])
+				N[i][j] = N[i - 1][j];
+			else
+				N[i][j] = N[i - 1][j] + N[i][j - value[i]];
+		}
 
-	printf("\nPeriod length:\n%d\n", period);
-
-	printf("Press any key to exit");
+	printf("Number of ways to change:\n%d\nPress any key to exit", N[7][j-1]);
 	_getch();
 
 	return 0;
