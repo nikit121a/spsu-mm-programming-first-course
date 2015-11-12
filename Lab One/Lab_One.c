@@ -36,7 +36,7 @@ int DecToBin(int s)
 		a[i] = 0;
 	}
 
-	for (i = 0; s>0; i++)
+	for (i = 0; s > 0; i++)
 	{
 		a[i] = s % 2;
 		s = s / 2;
@@ -122,7 +122,7 @@ int DecToBin(int s)
 
 
 	printf_s("Negative 32-bit integer\n");
-	for (i = 32; i <64; i++)
+	for (i = 32; i < 64; i++)
 	{
 		printf_s("%i", a[i]);
 	}
