@@ -50,6 +50,16 @@ int check(int a)
 		}
 		scanf_s("%i", &a);
 	}
+	while (sqrt(a) == int(sqrt(a)))
+	{
+		printf_s("Wrong number\n");
+		printf_s("Enter positive number:\n");
+		while (getchar() != '\n')
+		{
+			continue;
+		}
+		scanf_s("%i", &a);
+	}
 
 	return a;
 }

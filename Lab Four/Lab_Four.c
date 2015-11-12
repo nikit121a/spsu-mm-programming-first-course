@@ -27,6 +27,7 @@ int main(void)
 	printf_s("Simple numbers of Mersen:\n");
 	for (int i = 1; i <= N; i++)
 	{
+		printf_s("3\n");
 		if (Simple(i))
 		{
 			printf("%.0f\n", pow(2, i) - 1.0);
