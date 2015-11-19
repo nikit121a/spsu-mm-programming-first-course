@@ -3,15 +3,12 @@
 #include <math.h>
 
 
-
-
-
 int main()
 {
 	int n;
 	while (1)
 	{
-		printf("Enter the amount of penny: ");
+		printf("Enter the amount of penny (if the number is not an integer, the program will work with a whole part of the number): ");
 		scanf("%d", &n);
 		scanf("%*[^\n]");
 		if (n >= 0)
@@ -24,8 +21,21 @@ int main()
 			printf("%s\n", "Please, try again.");
 		}
 	}
-	int money[8] = { 1, 2, 5, 10, 20, 50, 100, 200 };
-	unsigned long long d[8][10000];
+	int **d = (int*)malloc(8 * sizeof(int));
+	int *money = (int*)malloc(8 * sizeof(int));
+
+	for (int i = 0; i < 8; i++)
+	{
+		d[i] = (int*)malloc(100000 * sizeof(int));
+	}
+	money[0] = 1;
+	money[1] = 2;
+	money[2] = 5;
+	money[3] = 10;
+	money[4] = 20;
+	money[5] = 50;
+	money[6] = 100;
+	money[7] = 200;
 	for (int i = 0; i < 8; i++)
 	{
 		for (int j = 0; j < 10000; j++)
