@@ -1,59 +1,51 @@
 #include <stdio.h>
 #include <conio.h>
+#include <stdlib.h>
 
 
-int recursive(int number, int coinValue, int returnValue)
+
+int money(int number)
 {
-	if (coinValue >= 200 && number / 200 > 0)
+	long **array = (long **)malloc(8 * sizeof(long));
+	for (int l = 0; l < 8; l++)
 	{
-		returnValue = recursive(number - 200, 200, returnValue);
+		array[l] = (long *)malloc(100000 * sizeof(long));
 	}
-	if (coinValue >= 100 && number / 100 > 0)
-	{
-		returnValue = recursive(number - 100, 100, returnValue);
-	}
-	if (coinValue >= 50 && number / 50 > 0)
-	{
-		returnValue = recursive(number - 50, 50, returnValue);
-	}
-	if (coinValue >= 20 && number / 20 > 0)
-	{
-		returnValue = recursive(number - 20, 20, returnValue);
-	}
-	if (coinValue >= 10 && number / 10 > 0)
-	{
-		returnValue = recursive(number - 10, 10, returnValue);
-	}
-	if (coinValue >= 5 && number / 5 > 0)
-	{
-		returnValue = recursive(number - 5, 5, returnValue);
-	}
-	if (coinValue >= 2 && number / 2 > 0)
-	{
-		returnValue = recursive(number - 2, 2, returnValue);
-	}
-	if (number > 0)
-	{
-		returnValue = recursive(number - 1, 1, returnValue);
-	}
-	if (number == 0)
-	{
-		returnValue++;
-	}
-	return returnValue;
 
+	int numbers[8] = { 1,2,5,10,20,50,100,200 };
+	int i, j;
+	//создание двумерного массива
+	for (i = 0; i < 8; i++)					//заполняем первый столбец единицами
+	{
+		array[i][0] = 1;
+	}
+	for (j = 0; j <= number; j++)			//заполняем первую строку единицами
+	{
+		array[0][j] = 1;
+	}
+	for (i = 1; i < 8; i++)
+	{
+		for (j = 1; j <= number; j++)
+		{
+			if (j < numbers[i])
+			{
+				array[i][j] = array[i - 1][j];
+			}
+			else
+			{
+				array[i][j] = array[i - 1][j] + array[i][j - numbers[i]];
+			}
+		}
+	}
+	return array[7][number];
 }
-
-
-
 
 int main()
 {
-	int coin;
+	double coin;
 	printf_s("Enter your count\n");
-	scanf_s("%d", &coin);
-
-	while (coin < 0)
+	scanf_s("%lf", &coin);
+	while ((coin < 0) || ((int)coin != coin))
 	{
 		printf_s("Wrong number\n");
 		printf_s("Enter three natural numbers:\n");
@@ -61,11 +53,10 @@ int main()
 		{
 			continue;
 		}
-		scanf_s("%i" , &coin);
+		scanf_s("%lf", &coin);
 	}
 
-	printf_s("count: %d", recursive(coin, 200, 0));
+	printf_s("count: %d", money((int)coin));
 	_getch();
 	return 0;
-
 }
