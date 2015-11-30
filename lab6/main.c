@@ -12,6 +12,11 @@ int base_list[11] = {7, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71};
 int cur_base = 0, last_correct_base = 0;
 
 
+typedef struct {
+	char[key_length] key;
+	char[val_length] val;
+} data;
+
 int hash(char key[key_length])
 {
 	/*hash[s] = s[0] + s[1] * p + s[2] * p^2...*/
@@ -39,29 +44,28 @@ short is_correct(int* chain_size, int l, int r) // table validation
 	return 1;
 }
 
-void put_in_table(char** hash_table, char** val_table, int* chain_size, char cur_key[key_length], int hash, char cur_val[val_length])
+void put_in_table(data** data_table, int* chain_size, char cur_key[key_length], int hash, char cur_val[val_length])
 {
 	
 	for (int i = 0; i < key_length; i++)
 	{
-		hash_table[hash][chain_size[hash] * key_length + i] = cur_key[i];
+		data_table[hash][chain_size[hash]].key[i] = cur_key[i];
 	}
 
 
 	for (int i = 0; i < val_length; i++)
 	{
-		val_table[hash][chain_size[hash] * val_length + i] = cur_val[i];
+		data_table[hash][chain_size[hash]].val[i] = cur_val[i];
 	}
 	chain_size[hash] ++;
 
 	return;
 }
 
-void table_rebalance(char** hash_table, char** val_table, int* chain_size) 
+void table_rebalance(data** data_table, data** data_table, int* chain_size) 
 {
-	char* buffer_val = (char*)malloc(sizeof(char[val_length]) * table_size * (max_chain + 1) + 1);
+	data* buffer_data = (data*)malloc(sizeof(data) * (table_size + 1));
 
-	char* buffer_key = (char*)malloc(sizeof(char[key_length]) * table_size * (max_chain + 1) + 1);
 
 	int buffer_head = 0;
 
@@ -71,7 +75,7 @@ void table_rebalance(char** hash_table, char** val_table, int* chain_size)
 		/* means that all hashes cause collisions*/
 		cur_base = last_correct_base - 1;
 		printf("Rebalance is impossible, back to the inital base\n");
-		table_rebalance(hash_table, val_table, chain_size);
+		table_rebalance(data_table, chain_size);
 		return;
 	}
 
@@ -80,14 +84,10 @@ void table_rebalance(char** hash_table, char** val_table, int* chain_size)
 		/*puts all data in the buffer*/
 		if(chain_size[i] > 0)
 		{
-			for (int j = 0; j <= chain_size[i] * key_length; j++)
+			for (int j = 0; j < chain_size[i]; j++)
 			{
-				buffer_key[j + buffer_head * key_length] = hash_table[i][j];
-			}
-
-			for (int j = 0; j <= chain_size[i] * val_length; j++)
-			{
-				buffer_val[j + buffer_head * val_length] = val_table[i][j];
+				buffer_data[buffer_head].key = data_table[i][j].key;
+				buffer_data[buffer_head].val = data_table[i][j].val;
 			}
 			buffer_head += chain_size[i];
 		}
@@ -101,19 +101,11 @@ void table_rebalance(char** hash_table, char** val_table, int* chain_size)
 	{
 		/*puts all data back in table with new hashes*/
 
-		char cur_key[key_length];
-		char cur_val[val_length];
+		data cur_data;
 
-		for (int j = i * key_length; j < (i + 1) * key_length; j++)
-		{
-			cur_key[j - i * key_length] = buffer_key[j];
-		}
-
-		for (int j = i * val_length; j < (i + 1) * val_length; j++)
-		{
-			cur_val[j - i * val_length] = buffer_val[j];
-		}
-		put_in_table(hash_table, val_table, chain_size, cur_key, hash(cur_key), cur_val);
+		cur_data.key = buffer_data[i].key;
+		cur_data.val = buffer_data[i].val
+		put_in_table(data_table, chain_size, cur_data, hash(cur_data.val));
 	}
 
 	if(!is_correct(chain_size, 0, table_size) &&
@@ -121,28 +113,27 @@ void table_rebalance(char** hash_table, char** val_table, int* chain_size)
 	{
 		/*If rebalance did not help*/
 		printf("Rebalance with base %d has failed. Trying  another base...\n", base_list[cur_base]);
-		table_rebalance(hash_table, val_table, chain_size);
+		table_rebalance(data_table, chain_size);
 		return;
 	}
 	last_correct_base = cur_base;
 	printf("Table was rebalanced, base for hash: %d\n", base_list[cur_base]);
-	free(buffer_key);
-	free(buffer_val);
+	free(buffer_data);
 }
 
 
-void remove_from_table(char** hash_table, int* chain_size, int s_pos, int hash)
+void remove_from_table(data** data_table, int* chain_size, int s_pos, int hash)
 {
 	/*function "find_string" returns position of the string, so it's easy to remove the string*/
 	for (int i = (s_pos - 1) * key_length; i < (chain_size[hash]) * key_length; i++)
 	{
-		hash_table[hash][i] = hash_table[hash][i + key_length];
+		data_table[hash][i] = data_table[hash][i + key_length];
 	}
 	chain_size[hash]--;
 	return;
 }
 
-int find_key(char** hash_table, int* chain_size, char cur_key[key_length], int hash)
+int find_key(data** data_table, int* chain_size, char cur_key[key_length], int hash)
 {
 	/*Tries to find string in table*/
 	int result = 0;
@@ -151,7 +142,7 @@ int find_key(char** hash_table, int* chain_size, char cur_key[key_length], int h
 		int cur_res = 1;
 		for (int j = 0; j < key_length; j++)
 		{
-			if(hash_table[hash][i * key_length + j] != cur_key[j])
+			if(data_table[hash][i * key_length + j] != cur_key[j])
 			{
 				cur_res = 0;
 			}
@@ -164,13 +155,13 @@ int find_key(char** hash_table, int* chain_size, char cur_key[key_length], int h
 	return result;
 }
 
-void print_val(char** val_table,int hash,int num)
+void print_val(data** data_table,int hash,int num)
 {
 	int i = val_length * (num - 1); 
 	printf("Value: ");
-	while (val_table[hash][i] != 0)
+	while (data_table[hash][i] != 0)
 	{
-		printf("%c", val_table[hash][i]);
+		printf("%c", data_table[hash][i]);
 		i++;
 	}
 	printf("\n");
@@ -179,16 +170,12 @@ void print_val(char** val_table,int hash,int num)
 
 int main()
 {
-	char** hash_table = (char**)malloc(sizeof(char*) * (table_size + 1));
-	char** val_table = (char**)malloc(sizeof(char*) * (table_size + 1));
+	data** data_table = (data**)malloc(sizeof(data*) * (table_size + 1));
 
 	for (int i = 0; i < table_size; i++)
 	{
-		hash_table[i] = (char*)malloc(sizeof(char[key_length]) * (max_chain + 1));
-		val_table[i] = (char*)malloc(sizeof(char[val_length]) * (max_chain + 1));
-
-		memset(val_table[i], 0, sizeof(char[val_length]) * (max_chain + 1));
-		memset(hash_table[i], 0, sizeof(char[key_length]) * (max_chain + 1));
+		data_table[i] = (data*)malloc(sizeof(data) * (max_chain + 1));
+		memset(data_table[i], 0, sizeof(data) * (max_chain + 1));
 	}
 
 	int* chain_size = (int*)malloc(sizeof(int) * (table_size + 1));
@@ -226,18 +213,18 @@ int main()
 		switch (action_num)
 		{
 		case 1: 
-			put_in_table(hash_table, val_table, chain_size, cur_key, hash(cur_key), cur_val);
+			put_in_table(data_table, chain_size, cur_data, hash(cur_data.val));
 			if(!is_correct(chain_size, hash(cur_key), hash(cur_key))) 
 			{
 				printf("Table has to be rebalanced. Please, wait...\n");
-				table_rebalance(hash_table, val_table, chain_size);
+				table_rebalance(data_table, chain_size);
 			}
 			printf("The string was successfully added.\n");
 			break;
 		case 2:
-			if(find_key(hash_table, chain_size, cur_key, hash(cur_key)))
+			if(find_key(data_table, chain_size, cur_data, hash(cur_data.val)))
 			{
-				remove_from_table(hash_table, chain_size, find_key(hash_table, chain_size, cur_key, hash(cur_key)), hash(cur_key));
+				remove_from_table(data_table, chain_size, find_key(data_table, chain_size, cur_data, hash(cur_data.val)), hash(cur_data.val));
 				printf("String was successfully removed.\n");
 			}
 			else
@@ -246,9 +233,9 @@ int main()
 			}
 			break;
 		case 3:
-			if(find_key(hash_table, chain_size, cur_key, hash(cur_key)))
+			if(find_key(data_table, chain_size, cur_data, hash(cur_data.val)))
 			{
-				print_val(val_table, hash(cur_key), find_key(hash_table, chain_size, cur_key, hash(cur_key)));
+				print_val(data_table, hash(cur_key), find_key(data_table, chain_size, cur_data, hash(cur_data.val)));
 			}
 			else
 			{
@@ -267,9 +254,9 @@ int main()
 	
 	for (int i = 0; i < table_size; i++)
 	{
-		free(hash_table[i]);
+		free(data_table[i]);
 	}
-	free(hash_table);
+	free(data_table);
 	free(chain_size);
 	return 0;
 
