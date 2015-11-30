@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 long long power(int t, int k)
 {
 	long long res = 1;
@@ -18,7 +19,7 @@ long long power(int t, int k)
 
 long long gcd(long long a, long long b)
 {
-	return (a) ? gcd(b%a, a) : b;
+	return (a) ? gcd(b % a, a) : b;
 }
 
 
@@ -42,7 +43,6 @@ int main()
 		{
 			printf("%d\n", z);
 		}
-
 	}
-			getchar();
+	getchar();
 }
