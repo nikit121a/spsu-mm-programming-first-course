@@ -25,6 +25,7 @@ int main()
 	{
 		printf("Enter the numbers\n");
 		scanf_s("%f%f%f", &x, &y, &z);
+		scanf_s("%*[^\n]");
 		if (x < 0 || y < 0 || z < 0)
 		{
 			printf("Incorrect input\n");
@@ -35,16 +36,16 @@ int main()
 		}
 	}
 	if (x + y <= z || x + z <= y || y + z <= x)
-		{
-			printf("Nope\n");
-		}
-		else
-		{
-			printf("Yes\n");
-			deg(x, y, z);
-			deg(z, x, y);
-			deg(y, z, x);
-		}
+	{
+		printf("Nope\n");
+	}
+	else
+	{
+		printf("Yes\n");
+		deg(x, y, z);
+		deg(z, x, y);
+		deg(y, z, x);
+	}
 	getchar();
 	return 0;
 }
