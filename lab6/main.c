@@ -8,14 +8,16 @@
 #define table_size 37813
 #define edge_chain 2
 
-int base_list[11] = {7, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71};
-int cur_base = 0, last_correct_base = 0;
-
 
 typedef struct {
-	char[key_length] key;
-	char[val_length] val;
+	char** hash_table; 
+	char** val_table;
+	int* chain_size;
 } data;
+
+int base_list[11] = { 7, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71 };
+int cur_base = 0, last_correct_base = 0;
+
 
 int hash(char key[key_length])
 {
@@ -36,7 +38,7 @@ short is_correct(int* chain_size, int l, int r) // table validation
 {
 	for (int i = l; i <= r; i++)
 	{
-		if(chain_size[i] > edge_chain) 
+		if (chain_size[i] > edge_chain)
 		{
 			return 0;
 		}
@@ -44,110 +46,126 @@ short is_correct(int* chain_size, int l, int r) // table validation
 	return 1;
 }
 
-void put_in_table(data** data_table, int* chain_size, char cur_key[key_length], int hash, char cur_val[val_length])
+void put_in_table(data table_data, char cur_key[key_length], int hash, char cur_val[val_length])
 {
-	
+
 	for (int i = 0; i < key_length; i++)
 	{
-		data_table[hash][chain_size[hash]].key[i] = cur_key[i];
+		table_data.hash_table[hash][table_data.chain_size[hash] * key_length + i] = cur_key[i];
 	}
 
 
 	for (int i = 0; i < val_length; i++)
 	{
-		data_table[hash][chain_size[hash]].val[i] = cur_val[i];
+		table_data.val_table[hash][table_data.chain_size[hash] * val_length + i] = cur_val[i];
 	}
-	chain_size[hash] ++;
+	table_data.chain_size[hash] ++;
 
 	return;
 }
 
-void table_rebalance(data** data_table, data** data_table, int* chain_size) 
+void table_rebalance(data table_data)
 {
-	data* buffer_data = (data*)malloc(sizeof(data) * (table_size + 1));
+	char* buffer_val = (char*)malloc(sizeof(char[val_length]) * table_size * (max_chain + 1) + 1);
 
+	char* buffer_key = (char*)malloc(sizeof(char[key_length]) * table_size * (max_chain + 1) + 1);
 
 	int buffer_head = 0;
 
 
-	if(cur_base == 9) 
+	if (cur_base == 9)
 	{
 		/* means that all hashes cause collisions*/
 		cur_base = last_correct_base - 1;
 		printf("Rebalance is impossible, back to the inital base\n");
-		table_rebalance(data_table, chain_size);
+		table_rebalance(table_data);
 		return;
 	}
 
 	for (int i = 0; i < table_size; i++)
 	{
 		/*puts all data in the buffer*/
-		if(chain_size[i] > 0)
+		if (table_data.chain_size[i] > 0)
 		{
-			for (int j = 0; j < chain_size[i]; j++)
+			for (int j = 0; j <= table_data.chain_size[i] * key_length; j++)
 			{
-				buffer_data[buffer_head].key = data_table[i][j].key;
-				buffer_data[buffer_head].val = data_table[i][j].val;
+				buffer_key[j + buffer_head * key_length] = table_data.hash_table[i][j];
 			}
-			buffer_head += chain_size[i];
+
+			for (int j = 0; j <= table_data.chain_size[i] * val_length; j++)
+			{
+				buffer_val[j + buffer_head * val_length] = table_data.val_table[i][j];
+			}
+			buffer_head += table_data.chain_size[i];
 		}
 	}
 
 	cur_base++;
-	memset(chain_size, 0, sizeof(int) * table_size);
+	memset(table_data.chain_size, 0, sizeof(int) * table_size);
 
 
 	for (int i = 0; i < buffer_head; i++)
 	{
 		/*puts all data back in table with new hashes*/
 
-		data cur_data;
+		char cur_key[key_length];
+		char cur_val[val_length];
 
-		cur_data.key = buffer_data[i].key;
-		cur_data.val = buffer_data[i].val
-		put_in_table(data_table, chain_size, cur_data, hash(cur_data.val));
+		for (int j = i * key_length; j < (i + 1) * key_length; j++)
+		{
+			cur_key[j - i * key_length] = buffer_key[j];
+		}
+
+		for (int j = i * val_length; j < (i + 1) * val_length; j++)
+		{
+			cur_val[j - i * val_length] = buffer_val[j];
+		}
+		put_in_table(table_data, cur_key, hash(cur_key), cur_val);
 	}
 
-	if(!is_correct(chain_size, 0, table_size) &&
+	if (!is_correct(table_data.chain_size, 0, table_size) &&
 		last_correct_base != cur_base) //in case of "derebalance"
 	{
 		/*If rebalance did not help*/
+		free(buffer_key);
+		free(buffer_val);
 		printf("Rebalance with base %d has failed. Trying  another base...\n", base_list[cur_base]);
-		table_rebalance(data_table, chain_size);
+		table_rebalance(table_data);
 		return;
 	}
 	last_correct_base = cur_base;
 	printf("Table was rebalanced, base for hash: %d\n", base_list[cur_base]);
-	free(buffer_data);
+	free(buffer_key);
+	free(buffer_val);
 }
 
 
-void remove_from_table(data** data_table, int* chain_size, int s_pos, int hash)
+void remove_from_table(data table_data, int s_pos, int hash)
 {
 	/*function "find_string" returns position of the string, so it's easy to remove the string*/
-	for (int i = (s_pos - 1) * key_length; i < (chain_size[hash]) * key_length; i++)
+	for (int i = (s_pos - 1) * key_length; i < (table_data.chain_size[hash]) * key_length; i++)
 	{
-		data_table[hash][i] = data_table[hash][i + key_length];
+		table_data.hash_table[hash][i] = table_data.hash_table[hash][i + key_length];
 	}
-	chain_size[hash]--;
+	table_data.chain_size[hash]--;
 	return;
 }
 
-int find_key(data** data_table, int* chain_size, char cur_key[key_length], int hash)
+int find_key(data table_data, char cur_key[key_length], int hash)
 {
 	/*Tries to find string in table*/
 	int result = 0;
-	for (int i = 0; i < chain_size[hash]; i++)
+	for (int i = 0; i < table_data.chain_size[hash]; i++)
 	{
 		int cur_res = 1;
 		for (int j = 0; j < key_length; j++)
 		{
-			if(data_table[hash][i * key_length + j] != cur_key[j])
+			if (table_data.hash_table[hash][i * key_length + j] != cur_key[j])
 			{
 				cur_res = 0;
 			}
 		}
-		if(cur_res == 1)
+		if (cur_res == 1)
 		{
 			result = i + 1;
 		}
@@ -155,13 +173,13 @@ int find_key(data** data_table, int* chain_size, char cur_key[key_length], int h
 	return result;
 }
 
-void print_val(data** data_table,int hash,int num)
+void print_val(char** val_table, int hash, int num)
 {
-	int i = val_length * (num - 1); 
+	int i = val_length * (num - 1);
 	printf("Value: ");
-	while (data_table[hash][i] != 0)
+	while (val_table[hash][i] != 0)
 	{
-		printf("%c", data_table[hash][i]);
+		printf("%c", val_table[hash][i]);
 		i++;
 	}
 	printf("\n");
@@ -170,23 +188,28 @@ void print_val(data** data_table,int hash,int num)
 
 int main()
 {
-	data** data_table = (data**)malloc(sizeof(data*) * (table_size + 1));
+	data table_data;
+	table_data.hash_table = (char**)malloc(sizeof(char*) * (table_size + 1));
+	table_data.val_table = (char**)malloc(sizeof(char*) * (table_size + 1));
 
 	for (int i = 0; i < table_size; i++)
 	{
-		data_table[i] = (data*)malloc(sizeof(data) * (max_chain + 1));
-		memset(data_table[i], 0, sizeof(data) * (max_chain + 1));
+		table_data.hash_table[i] = (char*)malloc(sizeof(char[key_length]) * (max_chain + 1));
+		table_data.val_table[i] = (char*)malloc(sizeof(char[val_length]) * (max_chain + 1));
+
+		memset(table_data.val_table[i], 0, sizeof(char[val_length]) * (max_chain + 1));
+		memset(table_data.hash_table[i], 0, sizeof(char[key_length]) * (max_chain + 1));
 	}
 
-	int* chain_size = (int*)malloc(sizeof(int) * (table_size + 1));
+	table_data.chain_size = (int*)malloc(sizeof(int) * (table_size + 1));
 
-	memset(chain_size, 0, sizeof(int) * (table_size + 1));
+	memset(table_data.chain_size, 0, sizeof(int) * (table_size + 1));
 
 	int action_num = 0;
-	while (action_num != 4) 
+	while (action_num != 4)
 	{
-		
-		printf("\nChoose the operation(1 - add, 2 - remove, 3 - check, 4 - exit): ");
+
+		printf("\nInput the key(1 - add, 2 - remove, 3 - check, 4 - exit): ");
 		action_num = -1;
 		scanf("%d", &action_num);
 		scanf("%*[^\n]");
@@ -197,7 +220,7 @@ int main()
 		char cur_key[key_length * 2];
 		memset(cur_key, 0, key_length * 2);
 
-		if(action_num == 1 || action_num == 2 || action_num == 3)
+		if (action_num == 1 || action_num == 2 || action_num == 3)
 		{
 			printf("Input the key: ");
 			scanf("%s", &cur_key);
@@ -212,19 +235,19 @@ int main()
 
 		switch (action_num)
 		{
-		case 1: 
-			put_in_table(data_table, chain_size, cur_data, hash(cur_data.val));
-			if(!is_correct(chain_size, hash(cur_key), hash(cur_key))) 
+		case 1:
+			put_in_table(table_data, cur_key, hash(cur_key), cur_val);
+			if (!is_correct(table_data.chain_size, hash(cur_key), hash(cur_key)))
 			{
 				printf("Table has to be rebalanced. Please, wait...\n");
-				table_rebalance(data_table, chain_size);
+				table_rebalance(table_data);
 			}
 			printf("The string was successfully added.\n");
 			break;
 		case 2:
-			if(find_key(data_table, chain_size, cur_data, hash(cur_data.val)))
+			if (find_key(table_data, cur_key, hash(cur_key)))
 			{
-				remove_from_table(data_table, chain_size, find_key(data_table, chain_size, cur_data, hash(cur_data.val)), hash(cur_data.val));
+				remove_from_table(table_data, find_key(table_data, cur_key, hash(cur_key)), hash(cur_key));
 				printf("String was successfully removed.\n");
 			}
 			else
@@ -233,9 +256,9 @@ int main()
 			}
 			break;
 		case 3:
-			if(find_key(data_table, chain_size, cur_data, hash(cur_data.val)))
+			if (find_key(table_data, cur_key, hash(cur_key)))
 			{
-				print_val(data_table, hash(cur_key), find_key(data_table, chain_size, cur_data, hash(cur_data.val)));
+				print_val(table_data.val_table, hash(cur_key), find_key(table_data, cur_key, hash(cur_key)));
 			}
 			else
 			{
@@ -245,19 +268,21 @@ int main()
 		case 4:
 			break;
 		default:
-			printf("Please, choose correctly.\n");
+			printf("Please, input the valid key.\n");
 			break;
 		}
-		
+
 	}
-	
-	
+
+
 	for (int i = 0; i < table_size; i++)
 	{
-		free(data_table[i]);
+		free(table_data.hash_table[i]);
+		free(table_data.val_table[i]);
 	}
-	free(data_table);
-	free(chain_size);
+	free(table_data.hash_table);
+	free(table_data.val_table);
+	free(table_data.chain_size);
 	return 0;
 
 }
