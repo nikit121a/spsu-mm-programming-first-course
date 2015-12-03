@@ -94,7 +94,7 @@ int main()
 		case 1:
 			printf_s("Enter your value:\n");
 			scanf_s("%s", value);
-			if (install(s, value) == NULL)
+			if (install(s, value, 20) == NULL)
 			{
 				printf_s("This value can not install\n");
 			}
