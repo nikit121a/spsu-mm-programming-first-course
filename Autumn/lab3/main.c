@@ -6,7 +6,7 @@
 void grad(double x, double y, double z)
 {
 	double A, cosA;
-	cosA = acos((pow(y, 2) + pow(z, 2) - pow(x, 2)) / (2 * y * z))* 180.0 / PI;
+	cosA = acos((pow(y, 2) + pow(z, 2) - pow(x, 2)) / (2 * y * z)) * 180.0 / PI;
 
 	double minA, secA;
 	int  intA = (int)cosA;
