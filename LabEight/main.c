@@ -3,7 +3,6 @@
 #include <stdlib.h>
 
 
-
 int money(int number)
 {
 	long **array = (long **)malloc(8 * sizeof(long));
@@ -14,12 +13,12 @@ int money(int number)
 
 	int numbers[8] = { 1,2,5,10,20,50,100,200 };
 	int i, j;
-
-	for (i = 0; i < 8; i++)					
+	//создание двумерного массива
+	for (i = 0; i < 8; i++)					//заполняем первый столбец единицами
 	{
 		array[i][0] = 1;
 	}
-	for (j = 0; j <= number; j++)			
+	for (j = 0; j <= number; j++)			//заполняем первую строку единицами
 	{
 		array[0][j] = 1;
 	}
@@ -38,6 +37,11 @@ int money(int number)
 		}
 	}
 	return array[7][number];
+	for (int l = 0; l < 8; l++)
+	{
+		free(array[l]);
+	}
+	free(array);
 }
 
 int main()
