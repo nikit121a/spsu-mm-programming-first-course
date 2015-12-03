@@ -4,12 +4,12 @@
  
 int gcd(int x, int y)
 {
-	return y ? gcd(y, x%y) : x;
+	return y ? gcd(y, x % y) : x;
 }
 
 int main()
 {
-   char c[50];
+   char c[80];
    int mas[3] = { -1, -1, -1 };
    printf("Enter three numbers.\n");
    int flag = 0;
