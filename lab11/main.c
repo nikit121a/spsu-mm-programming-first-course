@@ -136,6 +136,7 @@ int simulate(field_cell** inital_field, int max_time, virus_type virus, int immu
 
 void main()
 {
+	srand(1);
 	field_cell** field = (field_cell**)malloc(inital_s * sizeof(field_cell*));
 	for (int i = 0; i < inital_s; i++)
 	{
@@ -148,7 +149,7 @@ void main()
 	int k1, k2, k3, h_health, h_immunity; //parameters (k1, k2, k3) and human health and immunity
 	
 
-	input = fopen("test.txt", "r");  //it's easier to read from file
+	input = fopen("test.txt", "r");  
 
 	fscanf(input, "%d%d%d%d%d", &k1, &k2, &k3, &h_health, &h_immunity);
 	
@@ -166,13 +167,12 @@ void main()
 		}
 	}
 
-	virus_type best_virus, cur_virus;
 	virus_type virus_list[15];
 
 	for (int i = 0; i < 5; i++)
 	{
 		virus_list[i].radius = rand() % (k3 / (k1 + k2)) + 1;  //For correct work is necessary that random values for 
-		virus_list[i].strength = rand() % (k3 / (k1 + k2)) + 1;//radius and strength are chosen from range 1..max(k1,k2)
+		virus_list[i].strength = rand() % (k3 / (k1 + k2)) + 1;//radius and strength are chosen from range 1..(k3 / (k1 + k2)) + 1
 		virus_list[i].health = k3 / (k1 * virus_list[i].radius + k2 * virus_list[i].strength);
 		virus_list[i].score = simulate(field, 100, virus_list[i], h_immunity); //score shows how succefull the virus type is
 	}
@@ -189,8 +189,30 @@ void main()
 		}
 		for (int i = 5; i < 15; i++)//reproduction
 		{
-			virus_list[i].radius = virus_list[rand() % 5].radius; 
-			virus_list[i].strength = virus_list[rand() % 5].strength;
+			int parent_1 = rand() % 5 , parent_2 = rand() % 5;
+			while (parent_1 = parent_2)
+			{
+				parent_2 = rand() % 5;
+			}
+
+			int edge = rand() % 3;
+
+			switch (edge)
+			{
+			case 0:
+				virus_list[i].radius = virus_list[parent_2].radius;
+				virus_list[i].strength = virus_list[parent_2].strength;
+			case 1:
+				virus_list[i].radius = virus_list[parent_1].radius;
+				virus_list[i].strength = virus_list[parent_2].strength;
+			case 2:
+				virus_list[i].radius = virus_list[parent_1].radius;
+				virus_list[i].strength = virus_list[parent_1].strength;
+			default:
+				break;
+			}
+
+
 			if (rand() % 2 == 0) //mutation
 			{
 				virus_list[i].radius = rand() % (k3 / (k1 + k2)) + 1;
@@ -220,6 +242,14 @@ void main()
 		}
 	}
 
+	printf("  %d Generation: \n", 10);
+
+	for (int j = 0; j < 5; j++)
+	{
+		printf("%d type: radius - %d, strength - %d, life - %d, score - %d;\n", j, virus_list[j].radius,
+			virus_list[j].strength, virus_list[j].health, virus_list[j].score);
+	}
+
 
 	printf("*************************\n");
 	printf(" The most successful virus type scored %d points.\n Its radius - %d, strength - %d, life -  %d;\n", virus_list[0].score,
@@ -233,6 +263,7 @@ void main()
 		free(field[i]);
 	}
 
+	free(field);
 
-	return 0;
+	return;
 }
