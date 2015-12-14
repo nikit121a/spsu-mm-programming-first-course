@@ -13,6 +13,7 @@
 void get_color(int x, int y, int *r, int *g, int *b, long W, long H, unsigned char* pic_in)
 {
 	static int mode;
+	static int padding;
 	int num;
 	/*Setup*/
 	if(x == -1)
@@ -23,9 +24,15 @@ void get_color(int x, int y, int *r, int *g, int *b, long W, long H, unsigned ch
 			mode = 32;
 		return;
 	}
+	if (x == -2)
+	{
+		padding = y;
+		return;
+	}
+
 	if(mode == 24)
 	{
-		num = 3 * W * (H - y - 1) + 3 * x;
+		num = 3 * W * (H - y - 1) + 3 * x + padding * max(0, H - y - 1);
 		*b = pic_in[num + 0];
 		*g = pic_in[num + 1];
 		*r = pic_in[num + 2];
@@ -42,6 +49,7 @@ void get_color(int x, int y, int *r, int *g, int *b, long W, long H, unsigned ch
 void set_color(int x, int y, int r, int g, int b, long W, long H, unsigned char *pic_out)
 {
 	static int mode;
+	static int padding;
 	int num;
 	if(x == -1)
 	{
@@ -51,9 +59,15 @@ void set_color(int x, int y, int r, int g, int b, long W, long H, unsigned char 
 			mode = 32;
 		return;
 	}
+
+	if (x == -2)
+	{
+		padding = y;
+		return;
+	}
 	if(mode == 24)
 	{
-		num = 3 * W * (H - y - 1) + 3 * x;
+		num = 3 * W * (H - y - 1) + 3 * x + padding * max(0, H - y - 1);
 
 		pic_out[num + 0] = b;
 		pic_out[num + 1] = g;
@@ -106,7 +120,7 @@ void gauss(long W, long H, unsigned char *pic_in, unsigned char *pic_out)
 void median(long W, long H, unsigned char *pic_in, unsigned char *pic_out)
 {
 	int x, y, i, j;
-	int mas[9];
+	int masR[9], masG[9], masB[9];
 
 	for (y = 1; y < H - 1 ; y++)
 		for (x = 1; x < W - 1; x++)
@@ -116,18 +130,15 @@ void median(long W, long H, unsigned char *pic_in, unsigned char *pic_out)
 				{
 					int r, g, b;
 					get_color(x + j, y + i, &r, &g, &b, W, H, pic_in);
-					mas[(i + 1) * 3 + j + 1] = (r + g + b) / 3;
+					masR[(i + 1) * 3 + j + 1] = r;
+					masG[(i + 1) * 3 + j + 1] = g;
+					masB[(i + 1) * 3 + j + 1] = b;
 				}
-			qsort(mas, 9, sizeof(int), cmpfunc);
+			qsort(masR, 9, sizeof(int), cmpfunc);
+			qsort(masG, 9, sizeof(int), cmpfunc);
+			qsort(masB, 9, sizeof(int), cmpfunc);
 
-			for (i = -1; i < 2; i++)
-				for (j = -1; j < 2; j++)
-				{
-					int r, g, b;
-					get_color(x + j, y + i, &r, &g, &b, W, H, pic_in);
-					if (mas[5] == (r + g + b) / 3)
-						set_color(x, y, r, g, b, W, H, pic_out);
-				}
+			set_color(x, y, masR[5], masG[5], masB[5], W, H, pic_out);
 		}
 }
 
@@ -206,13 +217,14 @@ unsigned char * write_bmp(char *file_name, BITMAPFILEHEADER *BmpFileHeader, BITM
 	  fwrite(buf, 1, BmpFileHeader->bfOffBits - (sizeof(BITMAPINFOHEADER) + sizeof(BITMAPFILEHEADER)), bmp);
 	fseek(bmp, BmpFileHeader->bfOffBits, SEEK_SET);
 	
+	//r = BmpInfoHeader->biWidth * BmpInfoHeader->biHeight * BmpInfoHeader->biBitCount / 8;
  	r = BmpFileHeader->bfSize - BmpFileHeader->bfOffBits;
 
 	fwrite(pic_out, 1, r, bmp); 
 	fclose(bmp);
 	free(buf);
 	free(pic_in);
-	free(pic_out);
+	//free(pic_out);
 	
 	return NULL;
 }
@@ -223,7 +235,7 @@ unsigned char * open_bmp(char *file_name, BITMAPFILEHEADER *BmpFileHeader, BITMA
 {
 	FILE *bmp;
 
-	int r;
+	int r, mode = 24;
 
 	bmp = fopen(file_name, "rb");
 	if(bmp == NULL)
@@ -253,6 +265,7 @@ unsigned char * open_bmp(char *file_name, BITMAPFILEHEADER *BmpFileHeader, BITMA
 	{
 		set_color(-1, 32, 0, 0, 0, *W, *H, *pic_out);
 		get_color(-1, 32, NULL, NULL, NULL, *W, *H, *pic_in);
+		mode = 32;
 	}
 	else
 		printf("Incorrect format(must be 24 or 32)\n");
@@ -267,7 +280,16 @@ unsigned char * open_bmp(char *file_name, BITMAPFILEHEADER *BmpFileHeader, BITMA
 	}
 
 	fseek(bmp, BmpFileHeader->bfOffBits, SEEK_SET);
- 	r = BmpFileHeader->bfSize - BmpFileHeader->bfOffBits;
+    int r1 = *W * *H * mode / 8; 
+	r = BmpFileHeader->bfSize - BmpFileHeader->bfOffBits;
+
+	if (r1 != r)
+	{
+		set_color(-2, ((*W)) % 4, 0, 0, 0, *W, *H, *pic_out);
+		get_color(-2, ((*W)) % 4,NULL,  NULL, NULL, *W, *H, *pic_in);
+		
+	}
+
 	*pic_in = (unsigned char*)malloc(sizeof(unsigned char) * (r + 1));
 	*pic_out = (unsigned char*)malloc(sizeof(unsigned char) * (r + 1));
 	memset(*pic_out, 0, sizeof(unsigned char) * (r + 1));
