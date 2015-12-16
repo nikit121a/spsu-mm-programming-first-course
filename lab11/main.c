@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
-
+#define max(a,b) (((a) > (b)) ? (a) : (b))
+#define min(a,b) (((a) < (b)) ? (a) : (b))
 #define inital_h 1000
 #define inital_s 100
 
