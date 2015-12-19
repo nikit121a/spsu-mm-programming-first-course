@@ -24,6 +24,7 @@ void GRAY(RGBTRIPLE* pic, int W, int H)
 		pic[i].rgbtBlue  = 
 		pic[i].rgbtGreen = 
 		pic[i].rgbtRed   = (pic[i].rgbtRed + pic[i].rgbtGreen + pic[i].rgbtBlue) / 3;
+	printf("done\n");
 }
 
 void GAUSS(RGBTRIPLE* pic, RGBTRIPLE* pic_copy, int W, int H)
@@ -168,6 +169,7 @@ void SOBEL(int mode, RGBTRIPLE* pic, RGBTRIPLE* pic_copy, int W, int H)
 				pic[i * W + j].rgbtGreen = 80;
 			}
 		}
+	printf("done\n");
 }
 
 int cmpfunc(const void * a, const void * b)
@@ -181,6 +183,7 @@ void MEDIAN(RGBTRIPLE* pic, RGBTRIPLE* pic_copy, int W, int H)
 	int tempG[9];
 	int tempB[9];
 	for (int i = 1; i < H - 1; i++)
+	{
 		for (int j = 1; j < W - 1; j++)
 		{			
 			tempB[0] = pic_copy[(i - 1) * W + j - 1].rgbtBlue;
@@ -220,6 +223,10 @@ void MEDIAN(RGBTRIPLE* pic, RGBTRIPLE* pic_copy, int W, int H)
 			pic[i* W + j].rgbtGreen = tempG[8];
 			pic[i* W + j].rgbtBlue = tempB[8];
 		}
+		if (i % 100 == 0)
+			printf("%d%% complete\n", i*100/H);
+	}
+	printf("done\n");
 }
 
 int main(int argc, char *argv[])
@@ -240,7 +247,6 @@ int main(int argc, char *argv[])
 	if (bmp == NULL)
 	{
 		printf("Error: Cannot open file\n");
-		fclose(bmp);
 		return 0;
 	}
 
@@ -272,8 +278,7 @@ int main(int argc, char *argv[])
 	alpha = NULL;
 	trash = malloc(sizeof(char) * 4);
 
-	int padding = bih.biWidth % 4;
-
+	int padding = (-((bih.biWidth * bih.biBitCount / 8) % 4) + 4) % 4;
 	pic = malloc(bih.biWidth * bih.biHeight * sizeof(RGBTRIPLE));
 
 	if (bih.biBitCount == 24)
@@ -308,7 +313,7 @@ int main(int argc, char *argv[])
 
 	int input = 9;
 	printf("0 - gray\n");
-	printf("1 - gauss\n");
+	printf("1 - gauss(x15)\n");
 	printf("2 - sobel x\n");
 	printf("3 - sobel y\n");
 	printf("4 - sobel xy\n");
@@ -324,8 +329,9 @@ int main(int argc, char *argv[])
 		{
 			GAUSS(pic, pic_copy, bih.biWidth, bih.biHeight);
 			memcpy(pic_copy, pic, bih.biWidth * bih.biHeight * sizeof(RGBTRIPLE));
-			printf("gauss x %d\n", i);
-		   }
+			printf("gauss x%d\n", i);
+		}
+		printf("done\n");
 		break;
 	case 2:
 		SOBEL(1, pic, pic_copy, bih.biWidth, bih.biHeight);
