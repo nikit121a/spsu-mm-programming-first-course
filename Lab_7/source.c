@@ -272,7 +272,8 @@ int main(int argc, char *argv[])
 	alpha = NULL;
 	trash = malloc(sizeof(char) * 4);
 
-	int padding = -((bih.biWidth * bih.biBitCount / 8) % 4) + 4;
+	int padding = bih.biWidth % 4;
+
 	pic = malloc(bih.biWidth * bih.biHeight * sizeof(RGBTRIPLE));
 
 	if (bih.biBitCount == 24)
@@ -349,15 +350,30 @@ int main(int argc, char *argv[])
 	new_bmp = fopen("new_.bmp", "wb");
 	fwrite(&bfh, sizeof(BITMAPFILEHEADER), 1, new_bmp);
 	fwrite(&bih, sizeof(BITMAPINFOHEADER), 1, new_bmp);
-	for (int i = 0; i < bih.biHeight; i++)
-	{
-		for (int j = 0; j < bih.biWidth; j++)
-		{
-			fwrite(&pic[i * bih.biWidth + j], sizeof(RGBTRIPLE), 1, new_bmp);
-		}
-		fwrite(trash, sizeof(char), padding, new_bmp);
-	}
 
+	if (bih.biBitCount == 24)
+	{
+		for (int i = 0; i < bih.biHeight; i++)
+		{
+			for (int j = 0; j < bih.biWidth; j++)
+			{
+				fwrite(&pic[i * bih.biWidth + j], sizeof(RGBTRIPLE), 1, new_bmp);
+			}
+			fwrite(trash, sizeof(char), padding, new_bmp);
+		}
+	}
+	else if (bih.biBitCount == 32)
+	{
+		for (int i = 0; i < bih.biHeight; i++)
+		{
+			for (int j = 0; j < bih.biWidth; j++)
+			{
+				fwrite(&pic[i * bih.biWidth + j], sizeof(RGBTRIPLE), 1, new_bmp);
+				fwrite(&alpha[i * bih.biWidth + j], sizeof(BYTE), 1, new_bmp);
+			}
+			fwrite(trash, sizeof(char), padding, new_bmp);
+		}
+	}
 	fclose(new_bmp);
 	free(pic);
 	free(pic_copy);
