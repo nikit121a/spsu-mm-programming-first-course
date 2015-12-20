@@ -36,7 +36,7 @@ void init(HashTable *h, int size)
 	h->table = (list**)malloc(sizeof(list*) * h->size);
 	h->length = (int*)malloc(sizeof(int) * h->size);
 	memset(h->length, 0, sizeof(int) * h->size);
-	for (i = 0; i < h->size; i++)
+	for(i = 0; i < h->size; i++)
 	{
 		h->table[i] = (list*)malloc(sizeof(list));
 		h->table[i] = NULL;
@@ -47,7 +47,7 @@ unsigned int hash(char *str, int count)
 {
 	//using Ly hash function
 	unsigned int value = 0;
-	for (; *str; str++)
+	for(; *str; str++)
 	{
 		value += (unsigned char)(*str) + value * 1664525 + 1013904223;
 	}
@@ -64,7 +64,7 @@ void new_hash(HashTable *h)
 	list *conductor;
 	init(&new_h, SIZE);
 	new_h.count = h->count;
-	for (i = 0; i < h->size; i++)
+	for(i = 0; i < h->size; i++)
 	{
 		conductor = h->table[i];
 		while (conductor != NULL)
@@ -78,10 +78,10 @@ void new_hash(HashTable *h)
 	{
 		printf("Sorry, can not rebalanse the table.\n");
 		new_h.count = 0;
-		for (i = 0; i < h->size; i++)
+		for(i = 0; i < h->size; i++)
 		{
 			conductor = h->table[i];
-			while (conductor != NULL)
+			while(conductor != NULL)
 			{
 				add(&new_h, conductor->key, conductor->value);
 				conductor = conductor->next;
@@ -98,15 +98,15 @@ void add(HashTable *h, char *str_origin, char *value)
 	list *conductor = (list*)malloc(sizeof(list));
 	h->length[i]++;
 	h->width = max(h->width, h->length[i]);
-	if (h->table[i] == NULL)
+	if(h->table[i] == NULL)
 	{
 		h->table[i] = (list*)malloc(sizeof(list));
-		for (k = 0; str_origin[k] != '\0'; k++)
+		for(k = 0; str_origin[k] != '\0'; k++)
 		{
 			h->table[i]->key[k] = str_origin[k];
 		}
 		h->table[i]->key[k] = '\0';
-		for (k = 0; value[k] != '\0'; k++)
+		for(k = 0; value[k] != '\0'; k++)
 		{
 			h->table[i]->value[k] = value[k];
 		}
@@ -118,12 +118,12 @@ void add(HashTable *h, char *str_origin, char *value)
 		conductor->next = h->table[i]->next;
 		memcpy(conductor->key, h->table[i]->key, sizeof(h->table[i]->key));
 		memcpy(conductor->value, h->table[i]->value, sizeof(h->table[i]->value));
-		for (k = 0; str_origin[k] != '\0'; k++)
+		for(k = 0; str_origin[k] != '\0'; k++)
 		{
 			h->table[i]->key[k] = str_origin[k];
 		}
 		h->table[i]->key[k] = '\0';
-		for (k = 0; value[k] != '\0'; k++)
+		for(k = 0; value[k] != '\0'; k++)
 		{
 			h->table[i]->value[k] = value[k];
 		}
@@ -136,14 +136,14 @@ void add(HashTable *h, char *str_origin, char *value)
 int strcomp(char *str, char *str_new)
 {
 	int i;
-	for (i = 0; str[i] != '\0'; i++)
+	for(i = 0; str[i] != '\0'; i++)
 	{
 		if (str[i] != str_new[i])
 		{
 			return 0;
 		}
 	}
-	if (str[i] == '\0' && str_new[i] != '\0')
+	if(str[i] == '\0' && str_new[i] != '\0')
 	{
 		return 0;
 	}
@@ -158,14 +158,14 @@ void delete_key(HashTable *h, char *str)
 	int i = hash(str, h->count);
 	list *conductor;
 	conductor = h->table[i];
-	while (conductor && !strcomp(conductor->key, str))
+	while(conductor && !strcomp(conductor->key, str))
 	{
 		conductor = conductor->next;
 	}
 
-	if (conductor && strcomp(conductor->key, str))
+	if(conductor && strcomp(conductor->key, str))
 	{
-		if (h->table[i]->next == NULL)
+		if(h->table[i]->next == NULL)
 		{
 			h->table[i] = NULL;
 		}
@@ -187,11 +187,11 @@ char *search(HashTable *h, char *str)
 	int i = hash(str, h->count);
 	list *conductor;
 	conductor = h->table[i];
-	while (conductor && !strcomp(conductor->key, str))
+	while(conductor && !strcomp(conductor->key, str))
 	{
 		conductor = conductor->next;
 	}
-	if (strcomp(conductor->key, str))
+	if(strcomp(conductor->key, str))
 	{
 		printf("%s\n", conductor->value);
 	}
@@ -205,11 +205,11 @@ void print(HashTable *h)
 {
 	int i;
 	list *conductor;
-	for (i = 0; i < h->size; i++)
+	for(i = 0; i < h->size; i++)
 	{
 		printf("%d) ", i + 1);
 		conductor = h->table[i];
-		while (conductor)
+		while(conductor)
 		{
 			printf("\'%s\' : \'%s\'; ", conductor->key, conductor->value);
 			conductor = conductor->next;
@@ -263,7 +263,7 @@ int main()
 			printf("\nIncorrect input, please try again\n\n");
 			break;
 		}
-	} while (choice != 0);
+	} while(choice != 0);
 	getchar();
 	return 0;
 }
