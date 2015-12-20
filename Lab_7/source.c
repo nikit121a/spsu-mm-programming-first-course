@@ -14,7 +14,7 @@ void print_info(BITMAPFILEHEADER bfh, BITMAPINFOHEADER bih)
 	printf("bih.biPlanes --- %d\n", bih.biPlanes);
 	printf("bih.biBitCount - %d\n", bih.biBitCount);
 	printf("bih.biClrUsed -- %d\n", bih.biClrUsed);
-	printf("padding = %d\n", -((bih.biWidth * bih.biBitCount / 8) % 4) + 4);
+	printf("padding = %d\n", (-((bih.biWidth * bih.biBitCount / 8) % 4) + 4) % 4);
 	printf("size of headers = %d\n", (int)((sizeof(bfh) + sizeof(bih))));
 }
 
@@ -148,13 +148,13 @@ void SOBEL(int mode, RGBTRIPLE* pic, RGBTRIPLE* pic_copy, int W, int H)
 			{
 				pic[i * W + j].rgbtBlue =
 				pic[i * W + j].rgbtRed =
-				pic[i * W + j].rgbtGreen = 120;
+				pic[i * W + j].rgbtGreen = 125;
 			}
 			if (resX > soft_border)
 			{
 				pic[i * W + j].rgbtBlue =
 				pic[i * W + j].rgbtRed =
-				pic[i * W + j].rgbtGreen = 105;
+				pic[i * W + j].rgbtGreen = 100;
 			}
 			if (resX > medium_border)
 			{
@@ -219,9 +219,9 @@ void MEDIAN(RGBTRIPLE* pic, RGBTRIPLE* pic_copy, int W, int H)
 			qsort(tempR, 9, sizeof(int), cmpfunc);
 			qsort(tempG, 9, sizeof(int), cmpfunc);
 			qsort(tempB, 9, sizeof(int), cmpfunc);
-			pic[i* W + j].rgbtRed = tempR[8];
-			pic[i* W + j].rgbtGreen = tempG[8];
-			pic[i* W + j].rgbtBlue = tempB[8];
+			pic[i* W + j].rgbtRed = tempR[7];
+			pic[i* W + j].rgbtGreen = tempG[7];
+			pic[i* W + j].rgbtBlue = tempB[7];
 		}
 		if (i % 100 == 0)
 			printf("%d%% complete\n", i*100/H);
@@ -231,34 +231,38 @@ void MEDIAN(RGBTRIPLE* pic, RGBTRIPLE* pic_copy, int W, int H)
 
 int main(int argc, char *argv[])
 {
-	//if (argc < 2 || argc > 4)
-	//{
-	//	printf("Incorrect comand line arguments\n must be: \n input_file(at least) \nfilter( XSOBEL, YSOBEL, SOBEL(default), GAUSS, GRAY, MEDIAN) \n output file \n");
-	//	return 0;
-	//}
+	if (argc < 2 || argc > 4)
+	{
+		printf("Incorrect comand line arguments\n must be: \n input_file(at least)");
+		printf("\nfilter( SOBELX, SOBELY, SOBELXY, GAUSS, GRAY, MEDIAN) \n output file \n");
+		return 0;
+	}
 
 	FILE * bmp;
 
 	BITMAPFILEHEADER bfh;
 	BITMAPINFOHEADER bih;
-	const char *file_name = "1.bmp";
+	//char file_name[50];
+	//printf("file name : ");
+	//scanf("%s", file_name );
 
-	bmp = fopen(file_name, "rb");
+	bmp = fopen(argv[1], "rb");
 	if (bmp == NULL)
 	{
 		printf("Error: Cannot open file\n");
+		_getch();
 		return 0;
 	}
 
-	//char* filters[6] = { "GRAY", "GAUSS", "SOBELX", "SOBELY", "SOBELXY", "MEDIAN"};
-	//int filter = 0;
-	//for (filter = 0; filter <= 6; filter++)
-	//{
-	//	if (filter == 6)
-	//		break;
-	//	if (strcmp(filters[filter], argv[2]) == 0)
-	//		break;
-	//}
+	char* filters[6] = { "GRAY", "GAUSS", "SOBELX", "SOBELY", "SOBELXY", "MEDIAN"};
+	int filter = 0;
+	for (filter = 0; filter <= 6; filter++)
+	{
+		if (filter == 6)
+			break;
+		if (strcmp(filters[filter], argv[2]) == 0)
+			break;
+	}
 
 	fread(&bfh, sizeof(BITMAPFILEHEADER), 1, bmp);
 	fread(&bih, sizeof(BITMAPINFOHEADER), 1, bmp);
@@ -268,8 +272,13 @@ int main(int argc, char *argv[])
 	{
 		fclose(bmp);
 		printf("Error: file is not bmp\n");
+		_getch();
 		return 0;
 	}
+
+	//char new_file[50];
+	//printf("directory to save : ");
+	//scanf("%s", new_file);
 
 	RGBTRIPLE *pic;
 	RGBTRIPLE *pic_copy;
@@ -309,17 +318,17 @@ int main(int argc, char *argv[])
 	memcpy(pic_copy, pic, bih.biWidth * bih.biHeight * sizeof(RGBTRIPLE));
 	fclose (bmp);
 
-	print_info(bfh, bih);
+	//print_info(bfh, bih);
 
-	int input = 9;
-	printf("0 - gray\n");
-	printf("1 - gauss(x15)\n");
-	printf("2 - sobel x\n");
-	printf("3 - sobel y\n");
-	printf("4 - sobel xy\n");
-	printf("5 - median\n");
-	scanf("%d", &input);
-	switch (input)
+	//int input = 9;
+	//printf("0 - gray\n");
+	//printf("1 - gauss(x15)\n");
+	//printf("2 - sobel x\n");
+	//printf("3 - sobel y\n");
+	//printf("4 - sobel xy\n");
+	//printf("5 - median\n");
+	//scanf("%d", &input);
+	switch (filter)
 	{
 	case 0:
 		GRAY(pic, bih.biWidth, bih.biHeight);
@@ -353,7 +362,7 @@ int main(int argc, char *argv[])
 
 	FILE *new_bmp;
 
-	new_bmp = fopen("new_.bmp", "wb");
+	new_bmp = fopen(argv[3], "wb");
 	fwrite(&bfh, sizeof(BITMAPFILEHEADER), 1, new_bmp);
 	fwrite(&bih, sizeof(BITMAPINFOHEADER), 1, new_bmp);
 
