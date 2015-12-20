@@ -7,7 +7,6 @@
 
 void get_int32(int n) 
 {
-
 	/*
 		Prints number 'n' in Int32 binary representation
 	*/
@@ -20,21 +19,20 @@ void get_int32(int n)
 
 void get_float(int n)
 {
-
 	/*
 		Prints number 'n' in Float binary representation
 	*/
 	int i, k, exponent = 127;
 	
 	printf("Float conversion: %d", n >= 0 ? 0 : 1);
-	n=abs(n);
+	n = abs(n);
 	for(i = 1, k = 0; i < n; i <<= 1, k++);
 	k--;
 	exponent += k;
 	for(i = 7; i >= 0; i--)
-		printf("%d",abs(((1 << i) & exponent) >> i));
+		printf("%d", abs(((1 << i) & exponent) >> i));
 	for(i = k - 1; i >= 0; i--)
-		printf("%d",abs(((1 << i) & n) >> i));
+		printf("%d", abs(((1 << i) & n) >> i));
 	for(i = 22 - k; i >= 0; i--)
 		printf("0");
 	printf("\n");
@@ -42,21 +40,20 @@ void get_float(int n)
 
 void get_double(int n)
 {
-
 	/*
 		Prints number 'n' in Double binary representation
 	*/
 	int i, k, exponent = 1023;
 	
 	printf("Double conversion:\n%d", n >= 0 ? 0 : 1);
-	n=abs(n);
+	n = abs(n);
 	for(i = 1, k = 0; i < n; i <<= 1, k++);
 	k--;
 	exponent += k;
 	for(i = 10; i >= 0; i--)
-		printf("%d",abs(((1 << i) & exponent) >> i));
+		printf("%d", abs(((1 << i) & exponent) >> i));
 	for(i = k - 1; i >= 0; i--)
-		printf("%d",abs(((1 << i) & n) >> i));
+		printf("%d", abs(((1 << i) & n) >> i));
 	for(i = 51 - k; i >= 0; i--)
 		printf("0");
 	printf("\n");

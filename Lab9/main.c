@@ -3,7 +3,6 @@
 #include <string.h>
 
 #define N 1000000
-#define WIDTH 20 //max number of prime dividers
 #define DR(x) digital_root(x)
 
 int digital_root(int x)
@@ -18,28 +17,21 @@ int digital_root(int x)
 	}
 }
 
-int **primes()
+int *primes()
 {
-	int i, j, k, **table;
+	int i, j, *table;
 	table = (int**)malloc(sizeof(int*) * N);
-	for(i = 0; i < N; i++)
-	{
-		table[i] = (int*)malloc(sizeof(int) * WIDTH);
-		memset(table[i], 0, sizeof(int) * WIDTH);
-	}
+	memset(table, 0, sizeof(int*) * N);
 	for(i = 2; i < N; i++)
 	{
-		if(table[i][0] == 0)
+		if(table[i] == 0)
 		{
 			for(j = 1; j * i < N; j++)
 			{
-
-				k = 0;
-				while(table[j * i][k] != 0)
+				if(table[j * i] == 0)
 				{
-					k++;
+					table[j * i] = i;
 				}
-				table[j * i][k] = i;
 			}
 		}
 	}
@@ -77,7 +69,7 @@ int MDRS(int *count)
 
 int main()
 {
-	int **prime = primes(), i, j, *mdrs, sum = 0, temp, count[9] = {0};
+	int *prime = primes(), i, j, *mdrs, sum = 0, temp, count[9] = {0};
 	mdrs = (int*)malloc(sizeof(int) * N);
 	for(i = 2; i < 10; i++)
 	{
@@ -90,8 +82,8 @@ int main()
 		memset(count, 0, sizeof(int) * 9);
 		while(temp != 1)
 		{
-			count[DR(prime[temp][0]) - 1]++;
-			temp /= prime[temp][0];
+			count[DR(prime[temp]) - 1]++;
+			temp /= prime[temp];
 		}
 		j = MDRS(count);
 		mdrs[i] = max(DR(i), j);
@@ -99,6 +91,7 @@ int main()
 	}
 	printf("%d", sum);
 	getchar();
+	free(prime);
 	free(mdrs);
 	return 0;
 }

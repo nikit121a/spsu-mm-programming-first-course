@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <math.h>
-#define max 100
 
 int main()
 {
-	int a[max], b[max], c[max], i = 2; 
+	int a, b, c, new_a, new_b, new_c, i = 2; 
 	float x;
 	scanf("%f", &x);
 	while(x < 0.00001 || sqrt(x) - floor(sqrt(x)) < 0.00000001)
@@ -12,20 +11,19 @@ int main()
 		printf("Incorrect input, please try again:\n");
 		scanf("%f", &x);
 	}
-	a[0] = floor(sqrt(x));
-	b[0] = 0;
-	b[1] = a[0];
-	c[0] = 1;
-	c[1] = x - a[0] * a[0];
-	printf("Your fraction is: %d [ | ", a[0]);
+	a = floor(sqrt(x));
+	new_b = a;
+	b = a;
+	new_c = c = x - a * a;
+	printf("Your fraction is: %d [ | ", a);
 	do
 	{
-		a[i - 1] = floor((a[0] + b[i - 1] + .0) / c[i - 1]);
-		b[i] = a[i - 1] * c[i - 1] - b[i - 1];
-		c[i] = (x - b[i] * b[i]) / c[i - 1];
-		printf("%d | ", a[i - 1]);
+		new_a = floor((a + b + .0) / c);
+		b = new_a * c - b;
+		c = (x - b * b) / c;
+		printf("%d | ", new_a);
 		i++;
-	} while(b[i - 1] != b[1] || c[i - 1] != c[1]);
+	} while(b != new_b || c != new_c);
 	printf("], length of period equals to %d\n", i - 2);
 	getchar();
 	getchar();

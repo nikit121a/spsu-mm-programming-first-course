@@ -19,7 +19,7 @@ int main()
 	{
 		printf("Your input is incorrect, try again:\n");
 		scanf("%f %f %f", &a, &b, &c);
-		getchar();
+		scanf("%*[^\n]");
 	}
 
 	if(is_triangle(a, b, c))
