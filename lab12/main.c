@@ -1,85 +1,87 @@
-#include <windows.h>
-#include <WinBase.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
-void* myMalloc(size_t size)
+#define MEMORY_SIZE 404
+
+
+void *memoryStart;
+void *buffer;
+int *memoryInfo;
+
+
+void init()
 {
-	return (void *)VirtualAlloc(NULL, size, MEM_COMMIT, PAGE_READWRITE);
+	memoryStart = malloc(MEMORY_SIZE);
+	buffer = malloc(MEMORY_SIZE);
+	memoryInfo = malloc(sizeof(int) * MEMORY_SIZE);
+
+	for (int i = 0; i < MEMORY_SIZE; ++i)
+		memoryInfo[i] = 0;
+
 }
 
-void* myRealloc(int* Array, size_t newSize)
+void *myMalloc(int size)
 {
-	return (void *)VirtualAlloc(Array, newSize, MEM_COMMIT, PAGE_READWRITE);
-}
-
-void* myFree(int* Array)
-{
-	VirtualFree(Array, 0, MEM_RELEASE);
-}
-
-int check(x)
-{
-	while (1)
+	int indexOfLastZero = -1;
+	for (int i = 0; i < MEMORY_SIZE; ++i)
 	{
-		printf("Enter the amount of numbers: ");
-		scanf("%d", &x);
-		scanf("%*[^\n]");
-		if (x >= 0)
+		if (indexOfLastZero != -1 && (i - indexOfLastZero) == size)
 		{
-			break;
+			for (int j = 0; j < size; ++j)
+				memoryInfo[j + i - size] = 1;
+			memoryInfo[i - size] = size;
+			return (void*)((char*)memoryStart + i - size);
+		}
+		if (memoryInfo[i] == 0)
+		{
+			if (indexOfLastZero == -1)
+				indexOfLastZero = i;
 		}
 		else
 		{
-			printf("%s\n", "Incorrect input.");
-			printf("%s\n", "Please, try again.");
+			indexOfLastZero = -1;
 		}
 	}
-	return x;
+
+	return NULL;
+}
+
+void myFree(void *data)
+{
+	int index = (int)((char*)data - memoryStart);
+	int size = memoryInfo[index];
+	for (int i = 0; i < size; ++i)
+		memoryInfo[index + i] = 0;
+}
+
+void *myRealloc(void *data, int size)
+{
+	memcpy(buffer, data, size);
+	myFree(data);
+
+	int *startPointer = myMalloc(size);
+	if (startPointer == NULL)
+		return NULL;
+
+	memcpy(startPointer, buffer, size);
+	return startPointer;
+
+
 }
 
 int main()
 {
-	int amount, counter;
+	init();
+	int *array = (int *)myMalloc(50 * sizeof(int));
+	for (int i = 0; i < 50; ++i)
+		array[i] = i + 1;
 
-	amount = check(&amount);
-	
-	int *Array = (int*)myMalloc(sizeof(int) * amount);
-	
-	if (amount != 0)
-	{
-		printf("Enter numbers: ");
-		for (int i = 0; i < amount; i++)
-		{
-			scanf("%d", &Array[i]);
-		}
-	}
-	else
-	{
-		printf("Enter numbers: -\n");
-	}
+	array = (int *)myRealloc(array, 100 * sizeof(int));
+	for (int i = 50; i < 100; ++i)
+		array[i] = 1234;
 
+	myFree(array);
 
-	counter = check(&counter);
-
-	myRealloc(Array, counter * sizeof(int));
-
-	if (counter != 0)
-	{
-		printf("Enter numbers: ");
-		for (int i = 0; i < counter; i++)
-		{
-			int temp;
-			scanf("%d", &temp);
-			Array[i + amount] = temp;
-		}
-	}
-	else
-	{
-		printf("Enter numbers :-\n");
-	}
-
-	myFree(Array);
-
-	system("pause");
 	return 0;
 }
