@@ -7,6 +7,13 @@
 #define COUNT 10 // Number of ancestors
 #define DEPTH 10 // Number of generations
 #define ITERATIONS 5 // Time of emulating
+#define MAX_HP 100 // Max HP of the humans
+#define HP_INCREASE 5 // How many HP will be recovered
+#define PERSONS 1000 // Count of the persons on the field
+#define STRENGTH 45 // Max randomly choosed Strength - 1
+#define RADIUS 4 // Coefficient that associates sizes of the field and randomly choosed radius
+#define POSSIBILITY 45 // Number that control random generator in the multiply function
+#define MUTATION 9 // Possibility of the mutation, should be less than POSSIBILITY / 2
 
 typedef struct
 {
@@ -51,24 +58,24 @@ void multiply(gen *ancestors, info *inf, int height, int width, int k1, int k2, 
 	{
 		for(j = i + 1; j < COUNT / 2 && k < COUNT; j++)
 		{
-			possibility = rand() % 45;
-			if(possibility == 0)
+			possibility = rand() % POSSIBILITY;
+			if(possibility < MUTATION)
 			{
 				// Mutation
-				result[k].strength = rand() % 45;
-				temp = min(height / 4, width / 4);
+				result[k].strength = rand() % STRENGTH;
+				temp = min(height / RADIUS, width / RADIUS);
 				temp = max(temp, 1);
 				result[k].radius = rand() % temp;
 				result[k].period = k3 / (max(k1 * result[k].radius + k2 * result[k].strength, 1));
 			}
 			// Crossingover
-			if(possibility > 0 && possibility < 23)
+			if(possibility >= MUTATION && possibility < POSSIBILITY / 2)
 			{
 				result[k].strength = ancestors[inf[i].index].strength;
 				result[k].radius = ancestors[inf[j].index].radius;
 				result[k].period = k3 / (max(k1 * result[k].radius + k2 * result[k].strength, 1));
 			}
-			if(possibility >= 23)
+			if(possibility >= POSSIBILITY / 2)
 			{
 				result[k].strength = ancestors[inf[j].index].strength;
 				result[k].radius = ancestors[inf[i].index].radius;
@@ -81,24 +88,24 @@ void multiply(gen *ancestors, info *inf, int height, int width, int k1, int k2, 
 	return;
 }
 
-int emulation(char **field, char **immunity, int height, int width, int radius,int strength, int period, int steps)
+int emulation(char **field, int **immunity, int height, int width, int radius,int strength, int period, int steps)
 {
 	// Hold human's health points and count of zombie's turns at options[][]
 	int i, j, k, n, count = 0, iter = 0;
-	char **options;
+	int **options;
 	if(radius * strength * period == 0)
 	{
 		return 0;
 	}
-	options = (char**)malloc(sizeof(char*) * height);
+	options = (int**)malloc(sizeof(int*) * height);
 	for(i = 0; i < height; i++)
 	{
-		options[i] = (char*)malloc(sizeof(char) * width);
+		options[i] = (int*)malloc(sizeof(int) * width);
 		for(j = 0; j < width; j++)
 		{
 			if(field[i][j] == 'H')
 			{
-				options[i][j] = 100;
+				options[i][j] = MAX_HP;
 			}
 			if(field[i][j] == 'Z')
 			{
@@ -152,10 +159,10 @@ int emulation(char **field, char **immunity, int height, int width, int radius,i
 					options[i][j] = period;
 					count++;
 				}
-				if(field[i][j] == 'H' && options[i][j] > 0)
+				if(field[i][j] == 'H' && options[i][j] > 0 && options[i][j] > MAX_HP - HP_INCREASE)
 				{
 					// Increase health points of humans
-					options[i][j] += 5;
+					options[i][j] += HP_INCREASE;
 				}
 			}
 		}
@@ -173,7 +180,8 @@ int main()
 {
 	int count, height, width, k1, k2, k3; // Parametrs of the model
 	int	i, j, len, k, n, strength, radius, period, value, old_max = 0;
-	char **field, **immunity, **fieldcopy;
+	int **immunity;
+	char **field, **fieldcopy;
 	point *places;
 	gen *gens;
 	info *information;
@@ -186,21 +194,21 @@ int main()
 	printf("Input the number of zombies, height and width of field, constants k1, k2, k3,\nk3 = (k1 * radius + k2 * strength) / life:\n");
 	scanf_s("%d %d %d %d %d %d", &count, &height, &width, &k1, &k2, &k3);
 
-	while(count <= 0 || count > 1000 || height <= 0 || width <= 0 || height * width < 1000 || k1 <= 0 || k2 <= 0 || k3 <= 0)
+	while(count <= 0 || count > PERSONS || height <= 0 || width <= 0 || height * width < PERSONS || k1 <= 0 || k2 <= 0 || k3 <= 0)
 	{
 		printf("Incorrect input: all numbers should be natural,\ncount of zombies should be less or equal to 1000,\narea of the field must be more or equal to 1000.\nTry again:\n");
 		scanf_s("%d %d %d %d %d %d", &count, &height, &width, &k1, &k2, &k3);
 	}
 
-	k = 1000 - count; // number of peoples
+	k = PERSONS - count; // number of peoples
 	places = (point*)malloc(sizeof(point) * height * width);
 	field = (char**)malloc(sizeof(char*) * height);
-	immunity = (char**)malloc(sizeof(char*) * height);
+	immunity = (int**)malloc(sizeof(int*) * height);
 	fieldcopy = (char**)malloc(sizeof(char*) * height);
 	for(i = 0; i < height; i++)
 	{
 		field[i] = (char*)malloc(sizeof(char) * width);
-		immunity[i] = (char*)malloc(sizeof(char) * width);
+		immunity[i] = (int*)malloc(sizeof(int) * width);
 		fieldcopy[i] = (char*)malloc(sizeof(char) * width);
 	}
 	// Following code place humans and zombies randomly
@@ -225,7 +233,7 @@ int main()
 		swap(&places[j], &places[len - 1]);
 		len--;
 	}
-	for(i = 0; i < height * width - 1000; i++)
+	for(i = 0; i < height * width - PERSONS; i++)
 	{
 		j = rand() % len;
 		field[places[j].y][places[j].x] = '.';
@@ -248,8 +256,8 @@ int main()
 		{
 			memcpy(fieldcopy[j], field[j], sizeof(char) * width);
 		}
-		gens[i].strength = rand() % 45;
-		k = min(height / 4, width / 4);
+		gens[i].strength = rand() % STRENGTH;
+		k = min(height / RADIUS, width / RADIUS);
 		k = max(k, 1);
 		gens[i].radius = rand() % k;
 		gens[i].period = k3 / (max(k1 * gens[i].radius + k2 * gens[i].strength, 1));
