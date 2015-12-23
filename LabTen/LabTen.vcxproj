@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{E57EB6A8-CE4E-4CD5-AEB7-9DD05B4E82AF}</ProjectGuid>
+    <ProjectGuid>{1EF7F06C-905E-4083-BB68-2644C9AFBEEE}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>LabTen</RootNamespace>
+    <RootNamespace>ConsoleApplication9</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -148,6 +148,9 @@
   <ItemGroup>
     <ClCompile Include="main.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Source1.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

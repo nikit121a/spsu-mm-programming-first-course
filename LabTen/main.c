@@ -6,20 +6,24 @@
 #define min(a,b) (((a) < (b)) ? (a) : (b))
 #define inital_s 100
 #define h_human 10
+#define stamp 15
+#define parent_stamp 5
+#define max_time 100
+enum id { H = 'H', Z = 'Z' };
 
 #pragma pack(push, 1)
 typedef struct
 {
 	int health;
 	int immunity;
-	char identification;
+	enum id identification;
 }s_human;
 typedef struct
 {
 	int radius;
 	int strength;
 	int life;
-	int speed;
+	int points;
 }s_zombie;
 typedef struct
 {
@@ -61,7 +65,7 @@ int eden(s_human** cur_human, position* p_zombie, int x, int y, s_zombie virus, 
 
 }
 
-int game(s_human** original_human, int max_time, s_zombie virus)
+int game(s_human** original_human, s_zombie virus)
 {
 
 	int result = 0, count_of_zombie = -1;
@@ -107,7 +111,7 @@ int game(s_human** original_human, int max_time, s_zombie virus)
 			result += cur_result;
 
 			human[p_zombie[cur_zombie].x][p_zombie[cur_zombie].y].health--;				//забираем один день жизни у зомби
-			//делаем проверку, жив ли зомби
+																						//делаем проверку, жив ли зомби
 			if (human[p_zombie[cur_zombie].x][p_zombie[cur_zombie].y].health == 0)
 			{
 				cur_count_of_zombie--;
@@ -143,7 +147,7 @@ int game(s_human** original_human, int max_time, s_zombie virus)
 	free(human);
 	free(p_zombie);
 
-	return result + max_time;
+	return result;
 }
 
 
@@ -173,20 +177,20 @@ int main()
 			if (human[i][j].identification != 'Z')
 			{
 				human[i][j].health = h_human;
-				human[i][j].immunity = rand() % 19+1;
+				human[i][j].immunity = rand() % 19 + 1;
 			}
 		}
 	}
 
-	s_zombie virus[15];
+	s_zombie virus[stamp];
 
 	//k3=life(k1*radius+k2*strenght)
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < parent_stamp; i++)
 	{
 		virus[i].radius = rand() % (k3 / (k1 + k2)) + 1;
 		virus[i].strength = rand() % (k3 / (k1 + k2)) + 1;
 		virus[i].life = k3 / (k1 * virus[i].radius + k2 * virus[i].strength);
-		virus[i].speed = game(human, 100, virus[i]);											//скорость распространения вируса
+		virus[i].points = game(human, virus[i]);											//скорость распространения вируса
 	}
 
 	for (int generation = 1; generation < 20; generation++)										//генерация разных поколений
@@ -195,10 +199,10 @@ int main()
 
 		for (int j = 0; j < 5; j++)
 		{
-			printf("%d type: radius - %d, strength - %d, life - %d, speed - %d;\n", j, virus[j].radius,
-				virus[j].strength, virus[j].life, virus[j].speed);
+			printf("%d type: radius - %d, strength - %d, life - %d, points - %d;\n", j, virus[j].radius,
+				virus[j].strength, virus[j].life, virus[j].points);
 		}
-		for (int i = 5; i < 15; i++)
+		for (int i = parent_stamp; i < stamp; i++)
 		{
 			int parent1 = rand() % 5, parent2 = rand() % 5;										//выбор родителей для потомков
 			while (parent1 = parent2)
@@ -237,33 +241,33 @@ int main()
 			}
 
 			virus[i].life = k3 / (k1 * virus[i].radius + k2 * virus[i].strength);
-			virus[i].speed = game(human, 100, virus[i]);
+			virus[i].points = game(human, virus[i]);
 		}
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < parent_stamp; i++)
 		{
-			int max_speed = 0, max_index;													//выбор новых 5 особей
+			int max_points = 0, max_index;													//выбор новых 5 особей
 			for (int j = 5; j < 15; j++)
 			{
-				if (max_speed < virus[j].speed)
+				if (max_points < virus[j].points)
 				{
-					max_speed = virus[j].speed;
+					max_points = virus[j].points;
 					max_index = j;
 				}
 			}
 			virus[i] = virus[max_index];
-			virus[max_index].speed = 0;
+			virus[max_index].points = 0;
 		}
 	}
 
 	printf("  %d Generation: \n", 20);
 
-	for (int j = 0; j < 5; j++)
+	for (int j = 0; j < parent_stamp; j++)
 	{
-		printf("%d type: radius - %d, strength - %d, life - %d, speed - %d;\n", j, virus[j].radius,
-			virus[j].strength, virus[j].life, virus[j].speed);
+		printf("%d type: radius - %d, strength - %d, life - %d, points - %d;\n", j, virus[j].radius,
+			virus[j].strength, virus[j].life, virus[j].points);
 	}
 	printf("\n");
-	printf(" The most successful virus type speed %d points.\n Its radius - %d, strength - %d, life -  %d;\n", virus[0].speed,
+	printf(" The most successful virus type points %d.\n Its radius - %d, strength - %d, life -  %d;\n", virus[0].points,
 		virus[0].radius, virus[0].strength, virus[0].life);
 
 	_getch();
