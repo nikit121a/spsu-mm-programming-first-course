@@ -130,6 +130,12 @@ void add(HashTable *h, char *str_origin, char *value)
 		h->table[i]->value[k] = '\0';
 		h->table[i]->next = conductor;
 	}
+	if (h->width > MAX_LENGTH)
+	{
+		h->count++;
+		new_hash(h);
+		return;
+	}
 	return;
 }
 
@@ -240,11 +246,6 @@ int main()
 			gets(str);
 			gets(value);
 			add(&Hash, str, value);
-			if(Hash.width > MAX_LENGTH)
-			{
-				Hash.count++;
-				new_hash(&Hash);
-			}
 			break;
 		case 2:
 			getchar();

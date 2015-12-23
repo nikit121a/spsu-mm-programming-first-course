@@ -5,10 +5,11 @@ int main()
 {
 	int a, b, c, new_a, new_b, new_c, i = 2; 
 	float x;
+	printf("Input your number to get the continued fraction:\n");
 	scanf("%f", &x);
 	while(x < 0.00001 || sqrt(x) - floor(sqrt(x)) < 0.00000001)
 	{
-		printf("Incorrect input, please try again:\n");
+		printf("Incorrect input.\nNumber must be positive and not a square of the another number,\nplease try again:\n");
 		scanf("%f", &x);
 	}
 	a = floor(sqrt(x));
@@ -24,7 +25,7 @@ int main()
 		printf("%d | ", new_a);
 		i++;
 	} while(b != new_b || c != new_c);
-	printf("], length of period equals to %d\n", i - 2);
+	printf("],\nlength of period equals to %d\n", i - 2);
 	getchar();
 	getchar();
 	return 0;
