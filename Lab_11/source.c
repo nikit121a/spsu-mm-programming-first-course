@@ -175,11 +175,11 @@ int main()
 		}
 		for (int i = size_of_control_group; i < size_of_population; i++)  //reproduction
 		{
-			int parent_1 = rand() % 5;
-			int	parent_2 = rand() % 5;
+			int parent_1 = rand() % size_of_control_group;
+			int	parent_2 = rand() % size_of_control_group;
 			while (parent_1 == parent_2)
 			{
-				parent_2 = rand() % 5;
+				parent_2 = rand() % size_of_control_group;
 			}
 
 			int temp = rand() % 10;
