@@ -85,20 +85,6 @@ int simulate(struct people *h, struct virus virus)
 		}
 	}
 
-	//for (int i = 0; i < 1000; i++)
-	//{
-	//	if (human[i].zmb == 0)
-	//		new_poly[human[i].x][human[i].y] = '|';
-	//	else
-	//		new_poly[human[i].x][human[i].y] = 'Z';
-	//}
-
-	//FILE *n;
-	//n = fopen("n_poly.txt", "wb");
-	//for (int i = 0; i < 100; i++)
-	//	for (int j = 0; j < 100; j++)
-	//	  fwrite(&new_poly[i][j], sizeof(char), 1, n);
-
 	return score;
 }
 
@@ -224,28 +210,12 @@ int main()
 				virus[i].life_time = virus[parent_2].life_time;
 				break;
 			case 0: 
-			case 9:	//mutation type 1
-				virus[i].radius = rand() % (k3 / (k1 + k2)) + 1;
-				virus[i].strength = rand() % (k3 / (k1 + k2)) + 1;
-				virus[i].life_time = k3 / (k1 * virus[i].radius + k2 * virus[i].strength) + 10;
-				//virus[i].radius = virus[parent_1].radius + rand() % 11 - 5;
-				//virus[i].strength = virus[parent_1].strength + rand() % 11 - 5;
-				//virus[i].life_time = virus[parent_1].life_time + rand() % 11 - 5;
-				//(virus[i].radius < 1) ? virus[i].radius = 1 : 0;
-				//(virus[i].strength < 1) ? virus[i].strength = 1 : 0;
-				//(virus[i].life_time  < 1) ? virus[i].life_time = 1 : 0;
-				break;
 			case 7:
-			case 8: //mutation type 2 ( <=> type 1 if use coefficients )
+			case 8: 
+			case 9:	//mutation
 				virus[i].radius = rand() % (k3 / (k1 + k2)) + 1;
 				virus[i].strength = rand() % (k3 / (k1 + k2)) + 1;
 				virus[i].life_time = k3 / (k1 * virus[i].radius + k2 * virus[i].strength) + 10;
-				//virus[i].radius = virus[parent_2].radius + rand() % 11 - 5;
-				//virus[i].strength = virus[parent_2].strength + rand() % 11 - 5;
-				//virus[i].life_time = virus[parent_2].life_time + rand() % 11 - 5;
-				//(virus[i].radius < 1) ? virus[i].radius = 1 : 0;
-				//(virus[i].strength < 1) ? virus[i].strength = 1 : 0;
-				//(virus[i].life_time  < 1) ? virus[i].life_time = 1 : 0;
 				break;
 			default:
 				break;
