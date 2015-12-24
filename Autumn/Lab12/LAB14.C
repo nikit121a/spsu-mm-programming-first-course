@@ -150,6 +150,7 @@ void trashcleaner(void)
 			l->Next->Prev = tmp;
 			free(l);
 		}
+            tmp = tmp->Next;
 	}
 }
 
@@ -276,4 +277,5 @@ void main(void)
 	mas[1] = 52;
 	myRealloc(&mas[1], sizeof(int)* 4);
 	myFree(&mas[3]);
+        deinit();
 }
