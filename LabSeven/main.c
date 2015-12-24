@@ -464,11 +464,21 @@ int main(int argc, char *argv[])
 	ExitBitmapFile(&bih, &bfh, argv[2]);
 	if (bih.biBitCount == 32)
 	{
+		for (int l = 0; l < bih.biHeight; l++)
+		{
+			free(bitmapImage32[l]);
+			free(temp32[l]);
+		}
 		free(bitmapImage32);
 		free(temp32);
 	}
 	else
 	{
+		for (int l = 0; l < bih.biHeight; l++)
+		{
+			free(bitmapImage24[l]);
+			free(temp24[l]);
+		}
 		free(bitmapImage24);
 		free(buf);
 		free(temp24);
