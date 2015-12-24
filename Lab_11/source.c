@@ -3,11 +3,19 @@
 #include <string.h>
 #include <math.h>
 
+#define polygon_height 100
+#define polygon_width 100
+
+#define number_of_people 1000
 #define max_health 100
 #define death_health 0
 #define health_regen 5
+
 #define simulation_time 100
 #define max_generation 10
+#define size_of_population 15
+#define size_of_control_group 5
+
 
 struct people
 {
@@ -30,24 +38,24 @@ struct virus
 
 int simulate(struct people *h, struct virus virus)
 {
-	struct people human[1000];
-	for (int i = 0; i < 1000; i++)
+	struct people human[number_of_people];
+	for (int i = 0; i < number_of_people; i++)
 		human[i] = h[i];
 
 	int cur_damage;
 	int score = 0;
 
-	for (int i = 0; i < 1000; i++)
+	for (int i = 0; i < number_of_people; i++)
 		if (human[i].zmb)
 			human[i].vir_timer = virus.life_time;
 
 	for (int t = simulation_time; t > 0; t--)
 	{
-		for (int i = 0; i < 1000; i++)
+		for (int i = 0; i < number_of_people; i++)
 		{
 			if (human[i].zmb == 1 && human[i].vir_timer > 0)
 			{
-				for (int j = 0; j < 1000; j++)
+				for (int j = 0; j < number_of_people; j++)
 					if (abs(human[j].x - human[i].x) + abs(human[j].y - human[i].y) <= virus.radius
 						&& human[j].zmb == 0)
 					{
@@ -77,14 +85,13 @@ int simulate(struct people *h, struct virus virus)
 				human[i].vir_timer = virus.life_time;
 			}
 		}
-		for (int i = 0; i < 1000; i++)
+		for (int i = 0; i < number_of_people; i++)
 		{
 			human[i].health += health_regen;
 			if (human[i].health > max_health)
 				human[i].health = max_health;
 		}
 	}
-
 	return score;
 }
 
@@ -101,14 +108,14 @@ int main()
 	struct people human[1000];
 
 	int z = 0;
-	char poly[100][100];
+	char poly[polygon_height][polygon_width];
 	FILE *polygon;
 	polygon = fopen("poly.txt", "rb");
 
-	char new_poly[100][100];
+	char new_poly[polygon_height][polygon_width];
 	int k = 0;
-	for (int i = 0; i < 100; i++)
-		for (int j = 0; j < 100; j++)
+	for (int i = 0; i < polygon_height; i++)
+		for (int j = 0; j < polygon_width; j++)
 		{ 
 			new_poly[i][j] = ' ';
 			fread(&poly[i][j], sizeof(char), 1, polygon);
@@ -143,7 +150,7 @@ int main()
 		printf("Your three integer parameters ( k1^2 + k2^2 < k3  for better result)  \n");
 		printf("for example: 11 11 400 (tested when zombie <= 10) (%d zombie now):  \n", z);
 		scanf("%d%d%d", &k1, &k2, &k3);
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < size_of_control_group; i++)
 		{
 			virus[i].radius = rand() % (k3 / (k1 + k2)) + 1;  
 			virus[i].strength = rand() % (k3 / (k1 + k2)) + 1;
@@ -161,12 +168,12 @@ int main()
 	{
 		printf("  %d Generation: \n", generation);
 
-		for (int j = 0; j < 5; j++)
+		for (int j = 0; j < size_of_control_group; j++)
 		{
 			printf("%d virus: radius = %3.d, strength = %3.d, life time = %3.d, score : %3.d;\n", j+1,
 					 virus[j].radius, virus[j].strength, virus[j].life_time, virus[j].score);
 		}
-		for (int i = 5; i < 15; i++)  //reproduction
+		for (int i = size_of_control_group; i < size_of_population; i++)  //reproduction
 		{
 			int parent_1 = rand() % 5;
 			int	parent_2 = rand() % 5;
@@ -227,7 +234,7 @@ int main()
 		for (int i = 0; i < 5; i++) //selection
 		{
 			int max = 0, cur_max = 0;
-			for (int j = 5; j < 15; j++)
+			for (int j = 5; j < size_of_population; j++)
 			{
 				if (max <= virus[j].score)
 				{
@@ -243,13 +250,13 @@ int main()
 
 	printf("  %d Generation: \n", max_generation);
 
-	for (int j = 0; j < 5; j++)
+	for (int j = 0; j < size_of_control_group; j++)
 	{
 		printf("%d virus: radius = %3.d, strength = %3.d, life time = %3.d, score : %3.d;\n", j+1, virus[j].radius,
 			virus[j].strength, virus[j].life_time, virus[j].score);
 	}
 
-	printf("\nMax possible score: %d\n", 1000-z);
+	printf("\nMax possible score: %d\n", number_of_people - z);
 
 	_getch();
 }
