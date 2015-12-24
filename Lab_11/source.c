@@ -231,10 +231,10 @@ int main()
 			virus[i].score = simulate(human, virus[i]);
 		}
 
-		for (int i = 0; i < 5; i++) //selection
+		for (int i = 0; i < size_of_control_group; i++) //selection
 		{
 			int max = 0, cur_max = 0;
-			for (int j = 5; j < size_of_population; j++)
+			for (int j = size_of_control_group; j < size_of_population; j++)
 			{
 				if (max <= virus[j].score)
 				{
