@@ -24,7 +24,7 @@ RGBTRIPLE **temp24;
 //fopen(const char *fname, const char *mode);
 //открывает файл, им€ которого задаетс€ параметром fname, и возвращает указатель на поток, св€занный с этим файлом.
 
-int LoadBitmapFile(BITMAPINFOHEADER *bitmapInfoHeader, BITMAPFILEHEADER *bitmapFileHeader, char argv)
+int LoadBitmapFile(BITMAPINFOHEADER *bitmapInfoHeader, BITMAPFILEHEADER *bitmapFileHeader, char *argv)
 {
 	FILE *fileEnter;						//указатель на картинку						
 
@@ -49,7 +49,7 @@ int LoadBitmapFile(BITMAPINFOHEADER *bitmapInfoHeader, BITMAPFILEHEADER *bitmapF
 		bitmapImage32 = (RGBQUAD **)malloc(sizeof(RGBQUAD*)* bitmapInfoHeader->biHeight);
 		for (int i = 0; i < bitmapInfoHeader->biHeight; i++)
 		{
-			bitmapImage32[i] = (RGBQUAD *)malloc(sizeof(RGBQUAD)* bitmapInfoHeader->biWidth + 4 - bitmapInfoHeader->biWidth % 4);
+			bitmapImage32[i] = (RGBQUAD *)malloc(sizeof(RGBQUAD)* bitmapInfoHeader->biWidth );
 			temp32[i] = (RGBQUAD *)malloc(sizeof(RGBQUAD)* bitmapInfoHeader->biWidth);
 		}
 		//провер€м, выделилась ли пам€ть
@@ -77,7 +77,7 @@ int LoadBitmapFile(BITMAPINFOHEADER *bitmapInfoHeader, BITMAPFILEHEADER *bitmapF
 		//выдел€ем пам€ть дл€ переменной, содержащей основную информацию о цветах
 		temp24 = (RGBTRIPLE **)malloc(sizeof(RGBTRIPLE*)* bitmapInfoHeader->biHeight);
 		bitmapImage24 = (RGBTRIPLE **)malloc(sizeof(RGBTRIPLE*)* bitmapInfoHeader->biHeight);
-		for (int i = 0; i <= bitmapInfoHeader->biHeight; i++)
+		for (int i = 0; i < bitmapInfoHeader->biHeight; i++)
 		{
 			temp24[i] = (RGBTRIPLE *)malloc(sizeof(RGBTRIPLE)* bitmapInfoHeader->biWidth);
 			bitmapImage24[i] = (RGBTRIPLE *)malloc(sizeof(RGBTRIPLE)* bitmapInfoHeader->biWidth);
@@ -111,7 +111,7 @@ int LoadBitmapFile(BITMAPINFOHEADER *bitmapInfoHeader, BITMAPFILEHEADER *bitmapF
 	return 1;
 }
 
-int ExitBitmapFile(BITMAPINFOHEADER *bitmapInfoHeader, BITMAPFILEHEADER *bitmapFileHeader, char argv)
+int ExitBitmapFile(BITMAPINFOHEADER *bitmapInfoHeader, BITMAPFILEHEADER *bitmapFileHeader, char *argv)
 {
 	FILE *fileExit;							//указатель на картинку						
 
@@ -193,6 +193,7 @@ int gray(long W, long H, BITMAPINFOHEADER bih)
 	}
 	return 1;
 }
+
 int compare(const void *i, const void *j)
 {
 	return *(int *)i - *(int *)j;
@@ -418,7 +419,6 @@ int sobel(long W, long H, BITMAPINFOHEADER bih, char value)
 	return 1;
 }
 
-
 int main(int argc, char *argv[])
 {
 	// ќбъ€вл€ем структуры
@@ -479,9 +479,9 @@ int main(int argc, char *argv[])
 			free(bitmapImage24[l]);
 			free(temp24[l]);
 		}
+		free(temp24);
 		free(bitmapImage24);
 		free(buf);
-		free(temp24);
 	}
 	return 0;
 }
