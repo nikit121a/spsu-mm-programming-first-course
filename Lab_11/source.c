@@ -105,7 +105,7 @@ int main()
 	for (int i = 0; i <= coeff; i++)
 		any = rand();
 
-	struct people human[1000];
+	struct people human[number_of_people];
 
 	int z = 0;
 	char poly[polygon_height][polygon_width];
@@ -141,7 +141,7 @@ int main()
 			}
 		}
 
-	struct virus virus[15];
+	struct virus virus[size_of_population];
 
 	int k1, k2, k3;
 	int n;
