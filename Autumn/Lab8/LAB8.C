@@ -27,12 +27,12 @@ int main(void)
 
 	for (int i = 0; i < 8; i++)
 	{
-		d[i] = (int*)malloc(100000 * sizeof(int));
+		d[i] = (int*)malloc((N + 1) * sizeof(int));
 	}
 
 	for (i = 0; i < 8; i++)
 	{
-		for (j = 0; j < 10000; j++)
+		for (j = 0; j <= N; j++)
 		{
 			d[i][j] = 0;
 		}
@@ -40,13 +40,13 @@ int main(void)
 
 	d[0][0] = 1;
 
-	for (i = 0; i < 10000; i++)
+	for (i = 0; i < N; i++)
 	{
 		for (j = 0; j < 8; j++)
 		{
 			for (k = j; k < 8; k++)
 			{
-				if (i + val[k] <= 10000)
+				if (i + val[k] <= N)
 				{
 					d[k][i + val[k]] = d[k][i + val[k]] + d[j][i];
 				}
