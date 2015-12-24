@@ -45,12 +45,12 @@ int LoadBitmapFile(BITMAPINFOHEADER *bitmapInfoHeader, BITMAPFILEHEADER *bitmapF
 	if (bitmapInfoHeader->biBitCount == 32)
 	{
 		//выделяем память для переменной, содержащей основную информацию о цветах
-		temp32 = (RGBQUAD **)malloc(sizeof(RGBQUAD*)* bitmapInfoHeader->biHeight);
-		bitmapImage32 = (RGBQUAD **)malloc(sizeof(RGBQUAD*)* bitmapInfoHeader->biHeight);
+		temp32 = (RGBQUAD **)malloc(sizeof(RGBQUAD*) * bitmapInfoHeader->biHeight);
+		bitmapImage32 = (RGBQUAD **)malloc(sizeof(RGBQUAD*) * bitmapInfoHeader->biHeight);
 		for (int i = 0; i < bitmapInfoHeader->biHeight; i++)
 		{
-			bitmapImage32[i] = (RGBQUAD *)malloc(sizeof(RGBQUAD)* bitmapInfoHeader->biWidth );
-			temp32[i] = (RGBQUAD *)malloc(sizeof(RGBQUAD)* bitmapInfoHeader->biWidth);
+			bitmapImage32[i] = (RGBQUAD *)malloc(sizeof(RGBQUAD) * bitmapInfoHeader->biWidth );
+			temp32[i] = (RGBQUAD *)malloc(sizeof(RGBQUAD) * bitmapInfoHeader->biWidth);
 		}
 		//проверям, выделилась ли память
 		if (!bitmapImage32)
@@ -75,12 +75,12 @@ int LoadBitmapFile(BITMAPINFOHEADER *bitmapInfoHeader, BITMAPFILEHEADER *bitmapF
 	else
 	{
 		//выделяем память для переменной, содержащей основную информацию о цветах
-		temp24 = (RGBTRIPLE **)malloc(sizeof(RGBTRIPLE*)* bitmapInfoHeader->biHeight);
-		bitmapImage24 = (RGBTRIPLE **)malloc(sizeof(RGBTRIPLE*)* bitmapInfoHeader->biHeight);
+		temp24 = (RGBTRIPLE **)malloc(sizeof(RGBTRIPLE*) * bitmapInfoHeader->biHeight);
+		bitmapImage24 = (RGBTRIPLE **)malloc(sizeof(RGBTRIPLE*) * bitmapInfoHeader->biHeight);
 		for (int i = 0; i < bitmapInfoHeader->biHeight; i++)
 		{
-			temp24[i] = (RGBTRIPLE *)malloc(sizeof(RGBTRIPLE)* bitmapInfoHeader->biWidth);
-			bitmapImage24[i] = (RGBTRIPLE *)malloc(sizeof(RGBTRIPLE)* bitmapInfoHeader->biWidth);
+			temp24[i] = (RGBTRIPLE *)malloc(sizeof(RGBTRIPLE) * bitmapInfoHeader->biWidth);
+			bitmapImage24[i] = (RGBTRIPLE *)malloc(sizeof(RGBTRIPLE) * bitmapInfoHeader->biWidth);
 		}
 		//проверям, выделилась ли память
 		if (!bitmapImage24)
