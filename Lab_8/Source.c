@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define BUF_SIZE 6
+#define BUF_SIZE 12
 
 int read_double(double *value)
 {
@@ -70,7 +70,7 @@ int main()
 	for (int i = 0; i < 8; i++)
 		for (int j = 0; j < 10000; j++)
 		{
-			if (i*j == 0)
+			if (i * j == 0)
 				N[i][j] = 1;
 			else
 				N[i][j] = 0;
