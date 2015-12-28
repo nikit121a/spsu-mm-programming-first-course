@@ -38,17 +38,14 @@ int hash(uchar *key)
 void add_ht(uchar *key, int mode)
 {
 	int cur_hash = hash(key);
-	
+
 	if (table[cur_hash].chain_size == MAX_CHAIN)
 	{
 		printf("Impossible to add\n");
 		return;
 	}
 
-	for (int i = 0; i < KEY_LENGTH; i++)
-	{
-		table[cur_hash].chain[table[cur_hash].chain_size].key[i] = key[i];
-	}
+	table[cur_hash].chain[table[cur_hash].chain_size].key = key;
 
 	table[cur_hash].chain_size++;
 	if (table[cur_hash].chain_size == MAX_CHAIN && mode == 0)
@@ -62,11 +59,6 @@ void add_ht(uchar *key, int mode)
 
 		data* buffer = (data*)malloc(sizeof(data) * MAX_CHAIN * MAX_HASH);
 
-		for (int i = 0; i < MAX_CHAIN * MAX_HASH; i++)
-		{
-			buffer[i].key = (uchar*)malloc(sizeof(uchar) * KEY_LENGTH);
-		}
-
 		int buffer_head = 0;
 
 
@@ -76,10 +68,7 @@ void add_ht(uchar *key, int mode)
 			{
 				for (int j = 0; j < table[i].chain_size; j++)
 				{
-					for (int k = 0; k < KEY_LENGTH; k++)
-					{
-						buffer[buffer_head].key[k] = table[i].chain[j].key[k];
-					}
+					buffer[buffer_head].key = table[i].chain[j].key;
 					buffer_head++;
 				}
 			}
@@ -100,15 +89,10 @@ void add_ht(uchar *key, int mode)
 
 		printf("Table was rebalanced, base for hash: %d\n", hash_base);
 
-		for (int i = 0; i < MAX_CHAIN * MAX_HASH; i++)
-		{
-			free(buffer[i].key);
-		}
-
 		free(buffer);
 	}
 	return;
-}	
+}
 
 int check(uchar *key)
 {
@@ -138,11 +122,9 @@ void delete_ht(uchar *key)
 {
 
 	int position = check(key), key_hash = hash(key);
+	free(table[key_hash].chain[position].key);
 
-	for (int i = 0; i < KEY_LENGTH; i++)
-	{
-		table[key_hash].chain[position].key[i] = table[key_hash].chain[table[key_hash].chain_size].key[i];
-	}
+	table[key_hash].chain[position].key = table[key_hash].chain[table[key_hash].chain_size].key;
 
 	table[key_hash].chain_size--;
 	return;
@@ -159,18 +141,13 @@ void main()
 	for (int i = 0; i < MAX_HASH; i++)
 	{
 		table[i].chain = (data*)malloc(sizeof(data) * MAX_CHAIN);
-		for (int j = 0; j < MAX_CHAIN; j++)
-		{
-			table[i].chain[j].key = (uchar*)malloc(sizeof(uchar) * KEY_LENGTH);
-			memset(table[i].chain[j].key, 0, KEY_LENGTH);
-		}
 		table[i].chain_size = 0;
 	}
 
 	int switcher = 0;
-	uchar *cur_key = (uchar*)malloc(sizeof(uchar) * KEY_LENGTH);
 	while (switcher != 4)
 	{
+		uchar *cur_key = (uchar*)malloc(sizeof(uchar) * KEY_LENGTH);
 		memset(cur_key, 0, KEY_LENGTH);
 		printf("Enter the key: ");
 		scanf("%s", cur_key);
@@ -182,7 +159,7 @@ void main()
 		case 1:
 			add_ht(cur_key, 0);
 			printf("Success.\n");
-		
+
 			break;
 		case 2:
 			if (check(cur_key) == -1)
@@ -196,6 +173,7 @@ void main()
 				printf("Success.\n");
 
 			}
+			free(cur_key);
 			break;
 		case 3:
 			if (check(cur_key) == -1)
@@ -206,14 +184,12 @@ void main()
 			{
 				printf("Success. \n");
 			}
+			free(cur_key);
 			break;
 		case 4:
 			for (int i = 0; i < MAX_HASH; i++)
 			{
-				for (int j = 0; j < MAX_CHAIN; j++)
-				{
-					free(table[i].chain[j].key);
-				}
+
 				free(table[i].chain);
 			}
 			free(table);
