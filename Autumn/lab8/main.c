@@ -1,15 +1,16 @@
 #include <stdio.h>
 #include <math.h>
-#include <stdint.h>
 
 int main()
 {
 	int n;
 	int flag = 0;
 	char c[80], c2[80];
-
-	while (flag == 0)
+	fgets(c, 80, stdin);
+	sscanf(c, "%d", &n);
+	if (strlen(c) == strlen(itoa(n, c2, 10)) + 1)
 	{
+		flag = 1;
 
 		int v[8] = { 1, 5, 10, 25, 50, 100, 200 };
 
@@ -31,12 +32,6 @@ int main()
 					if (i + v[k] <= n)
 						d[k][i + v[k]] += d[j][i];
 
-		fgets(c, 80, stdin);
-		sscanf(c, "%d", &n);
-		if (strlen(c) == strlen(itoa(n, c2, 10)) + 1)
-		{
-			flag = 1;
-
 			unsigned long long ans = 0;
 			for (int i = 0; i < 8; i++)
 				ans += d[i][n];
@@ -45,14 +40,13 @@ int main()
 			{
 				printf("There are ");
 				printf("%d", ans);
-				printf(" ways/n");
+				printf(" ways /n");
 			}
 			else
 			{
-				printf("There is only 1 way/n");
+				printf("There is only 1 way /n");
 			}
 		}
-	}
 
 	return 0;
 }
