@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include  <string.h>
 #include <stdbool.h>
 
 #define MAX_HASH 127
 #define MAX_CHAIN 3
+#define KEY_LENGTH 20
 #define uchar unsigned char
 
 typedef struct
@@ -25,7 +26,7 @@ int hash(uchar *key)
 {
 	int result = 0, cur_p = 1;
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < KEY_LENGTH; i++)
 	{
 		result = (result + key[i] * cur_p) % MAX_HASH;
 		cur_p *= hash_base;
@@ -34,24 +35,80 @@ int hash(uchar *key)
 	return result;
 }
 
-void add_ht(uchar *key)
+void add_ht(uchar *key, int mode)
 {
 	int cur_hash = hash(key);
-
+	
 	if (table[cur_hash].chain_size == MAX_CHAIN)
 	{
 		printf("Impossible to add\n");
 		return;
 	}
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < KEY_LENGTH; i++)
 	{
 		table[cur_hash].chain[table[cur_hash].chain_size].key[i] = key[i];
 	}
 
 	table[cur_hash].chain_size++;
+	if (table[cur_hash].chain_size == MAX_CHAIN && mode == 0)
+	{ //rebalance_ht
+
+		if (hash_base == 53)
+		{
+			printf("Rebalance is impossible.\n");
+			return;
+		}
+
+		data* buffer = (data*)malloc(sizeof(data) * MAX_CHAIN * MAX_HASH);
+
+		for (int i = 0; i < MAX_CHAIN * MAX_HASH; i++)
+		{
+			buffer[i].key = (uchar*)malloc(sizeof(uchar) * KEY_LENGTH);
+		}
+
+		int buffer_head = 0;
+
+
+		for (int i = 0; i < MAX_HASH; i++)
+		{
+			if (table[i].chain_size > 0)
+			{
+				for (int j = 0; j < table[i].chain_size; j++)
+				{
+					for (int k = 0; k < KEY_LENGTH; k++)
+					{
+						buffer[buffer_head].key[k] = table[i].chain[j].key[k];
+					}
+					buffer_head++;
+				}
+			}
+		}
+
+		hash_base = 53;
+
+		for (int i = 0; i < MAX_HASH; i++)
+		{
+			table[i].chain_size = 0;
+		}
+
+
+		for (int i = 0; i < buffer_head; i++)
+		{
+			add_ht(buffer[i].key, 1);
+		}
+
+		printf("Table was rebalanced, base for hash: %d\n", hash_base);
+
+		for (int i = 0; i < MAX_CHAIN * MAX_HASH; i++)
+		{
+			free(buffer[i].key);
+		}
+
+		free(buffer);
+	}
 	return;
-}
+}	
 
 int check(uchar *key)
 {
@@ -60,7 +117,7 @@ int check(uchar *key)
 	for (int i = 0; i < table[cur_hash].chain_size; i++)
 	{
 		bool flag = true;
-		for (int j = 0; j < 10; j++)
+		for (int j = 0; j < KEY_LENGTH; j++)
 		{
 			if (table[cur_hash].chain[table[cur_hash].chain_size - 1].key[j] != key[j])
 			{
@@ -82,7 +139,7 @@ void delete_ht(uchar *key)
 
 	int position = check(key), key_hash = hash(key);
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < KEY_LENGTH; i++)
 	{
 		table[key_hash].chain[position].key[i] = table[key_hash].chain[table[key_hash].chain_size].key[i];
 	}
@@ -91,61 +148,7 @@ void delete_ht(uchar *key)
 	return;
 }
 
-void rebal_ht()
-{
-	if (hash_base == 53)
-	{
-		printf("Rebalance is impossible.\n");
-		return;
-	}
 
-	data* buffer = (data*)malloc(sizeof(data) * MAX_CHAIN * MAX_HASH);
-
-	for (int i = 0; i < MAX_CHAIN * MAX_HASH; i++)
-	{
-		buffer[i].key = (uchar*)malloc(sizeof(uchar) * 10);
-	}
-
-	int buffer_head = 0;
-
-
-	for (int i = 0; i < MAX_HASH; i++)
-	{
-		if (table[i].chain_size > 0)
-		{
-			for (int j = 0; j < table[i].chain_size; j++)
-			{
-				for (int k = 0; k < 10; k++)
-				{
-					buffer[buffer_head].key[k] = table[i].chain[j].key[k];
-				}
-				buffer_head++;
-			}
-		}
-	}
-
-	hash_base = 53;
-
-	for (int i = 0; i < MAX_HASH; i++)
-	{
-		table[i].chain_size = 0;
-	}
-
-
-	for (int i = 0; i < buffer_head; i++)
-	{
-		add_ht(buffer[i].key);
-	}
-
-	printf("Table was rebalanced, base for hash: %d\n", hash_base);
-
-	for (int i = 0; i < MAX_CHAIN * MAX_HASH; i++)
-	{
-		free(buffer[i].key);
-	}
-
-	free(buffer);
-}
 
 
 
@@ -158,17 +161,17 @@ void main()
 		table[i].chain = (data*)malloc(sizeof(data) * MAX_CHAIN);
 		for (int j = 0; j < MAX_CHAIN; j++)
 		{
-			table[i].chain[j].key = (uchar*)malloc(sizeof(uchar) * 10);
-			memset(table[i].chain[j].key, 0, 10);
+			table[i].chain[j].key = (uchar*)malloc(sizeof(uchar) * KEY_LENGTH);
+			memset(table[i].chain[j].key, 0, KEY_LENGTH);
 		}
 		table[i].chain_size = 0;
 	}
 
 	int switcher = 0;
-	uchar *cur_key = (uchar*)malloc(sizeof(uchar) * 10);
+	uchar *cur_key = (uchar*)malloc(sizeof(uchar) * KEY_LENGTH);
 	while (switcher != 4)
 	{
-		memset(cur_key, 0, 10);
+		memset(cur_key, 0, KEY_LENGTH);
 		printf("Enter the key: ");
 		scanf("%s", cur_key);
 		scanf("%*[^\n]");
@@ -177,12 +180,9 @@ void main()
 		switch (switcher)
 		{
 		case 1:
-			add_ht(cur_key);
+			add_ht(cur_key, 0);
 			printf("Success.\n");
-			if (table[hash(cur_key)].chain_size == MAX_CHAIN)
-			{
-				rebal_ht();
-			}
+		
 			break;
 		case 2:
 			if (check(cur_key) == -1)
@@ -226,6 +226,3 @@ void main()
 
 	return;
 }
-
-
-
