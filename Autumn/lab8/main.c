@@ -1,9 +1,9 @@
 #include <stdio.h>
-#include <math.h> 
+#include <math.h>
+#include <stdint.h>
 
 int main()
 {
-
 	int n;
 	int flag = 0;
 	char c[80], c2[80];
@@ -16,19 +16,19 @@ int main()
 		long **d = (long **)malloc(8 * sizeof(long));
 		for (int i = 0; i < 8; i++)
 		{
-			d[i] = (long *)malloc(30000 * sizeof(long));
+			d[i] = (long *)malloc(n * sizeof(long));
 		}
 
 
 		for (int i = 0; i < 8; i++)
-			for (int j = 0; j < 30001; j++)
+			for (int j = 0; j < n+1; j++)
 				d[i][j] = 0;
 		d[0][0] = 1;
 
-		for (int i = 0; i < 30000; i++)
+		for (int i = 0; i < n; i++)
 			for (int j = 0; j < 8; j++)
 				for (int k = j; k < 8; k++)
-					if (i + v[k] <= 30000)
+					if (i + v[k] <= n)
 						d[k][i + v[k]] += d[j][i];
 
 		fgets(c, 80, stdin);
@@ -45,7 +45,7 @@ int main()
 			{
 				printf("There are ");
 				printf("%d", ans);
-				printf(" ways");
+				printf(" ways/n");
 			}
 			else
 			{
