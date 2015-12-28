@@ -118,9 +118,9 @@ void makeZombie(int k1, int k2, int k3)
 					field[i][j].zombie.radius = 5;
 				}
 				field[i][j].zombie.strenght = rand() % (STRENGTH + 1);
-				if (field[i][j].zombie.strenght < 15)
+				if (field[i][j].zombie.strenght < 40)
 				{
-					field[i][j].zombie.strenght = 15;
+					field[i][j].zombie.strenght = 40;
 				}
 				field[i][j].zombie.life = k3 / (k1 * field[i][j].zombie.radius + k2 * field[i][j].zombie.strenght);
 			}
@@ -136,9 +136,9 @@ void makeNewZombie(int k1, int k2, int k3, int i, int j)
 		field[i][j].zombie.radius = 5;
 	}
 	field[i][j].zombie.strenght = rand() % (STRENGTH + 1);
-	if (field[i][j].zombie.radius < 15)
+	if (field[i][j].zombie.radius < 40)
 	{
-		field[i][j].zombie.strenght = 15;
+		field[i][j].zombie.strenght = 40;
 	}
 	field[i][j].zombie.life = k3 / (k1 * field[i][j].zombie.radius + k2 * field[i][j].zombie.strenght);
 	field[i][j].busyness = FULL_Z;
@@ -155,49 +155,52 @@ int zombieAttack(int k1, int k2, int k3)
 {
 	int amountOfDeath = 0;
 	int temp;
-	for (int i_z = 0; i_z < HEIGHT; i_z++)
+	for (int i = 0; i < 100; i++)
 	{
-		for (int j_z = 0; j_z < WIDTH; j_z++)
+		for (int i_z = 0; i_z < HEIGHT; i_z++)
 		{
-			if (field[i_z][j_z].busyness == FULL_Z)
+			for (int j_z = 0; j_z < WIDTH; j_z++)
 			{
-				for (int i_p = 0; i_p < HEIGHT; i_p++)
+				if (field[i_z][j_z].busyness == FULL_Z)
 				{
-					for (int j_p = 0; j_p < WIDTH; j_p++)
+					for (int i_p = 0; i_p < HEIGHT; i_p++)
 					{
-						if (field[i_z][j_z].busyness == FULL_P)
+						for (int j_p = 0; j_p < WIDTH; j_p++)
 						{
-							if ((i_p - i_z) * (i_p - i_z) + (j_p - j_z)*(j_p - j_z) <= field[i_z][j_z].zombie.radius * field[i_z][j_z].zombie.radius)
+							if (field[i_z][j_z].busyness == FULL_P)
 							{
-								temp = field[i_z][j_z].zombie.strenght - field[i_p][j_p].person.immunity;
-								if (temp > 0)
+								if ((i_p - i_z) * (i_p - i_z) + (j_p - j_z)*(j_p - j_z) <= field[i_z][j_z].zombie.radius * field[i_z][j_z].zombie.radius)
 								{
-									field[i_p][j_p].person.health -= temp;
+									temp = field[i_z][j_z].zombie.strenght - field[i_p][j_p].person.immunity;
+									if (temp > 0)
+									{
+										field[i_p][j_p].person.health = field[i_p][j_p].person.health - temp;
+									}
 								}
-							}
-							if (field[i_p][j_p].person.health <= 0)
-							{
-								makeNewZombie(k1, k2, k3, i_p, j_p);
-								amountOfDeath++;
+								if (field[i_p][j_p].person.health <= 0)
+								{
+									makeNewZombie(k1, k2, k3, i_p, j_p);
+									amountOfDeath++;
+								}
 							}
 						}
 					}
-				}
-				field[i_z][j_z].zombie.life--;
-				if (field[i_z][j_z].zombie.life <= 0)
-				{
-					makeNewPoint(i_z, j_z);
+					field[i_z][j_z].zombie.life--;
+					if (field[i_z][j_z].zombie.life <= 0)
+					{
+						makeNewPoint(i_z, j_z);
+					}
 				}
 			}
 		}
-	}
-	for (int i = 0; i < HEIGHT; i++)
-	{
-		for (int j = 0; j < WIDTH; j++)
+		for (int i = 0; i < HEIGHT; i++)
 		{
-			if (field[i][j].busyness == FULL_P)
+			for (int j = 0; j < WIDTH; j++)
 			{
-				field[i][j].person.health = field[i][j].person.health < 95 ? field[i][j].person.health + HP_CHANGING : 100;
+				if (field[i][j].busyness == FULL_P)
+				{
+					field[i][j].person.health = field[i][j].person.health < 95 ? field[i][j].person.health + HP_CHANGING : 100;
+				}
 			}
 		}
 	}
@@ -316,13 +319,20 @@ int main()
 	makePerson();
 	makeZombie(k1, k2, k3);
 
-	int countOfDeathPrevious = 0, countOfDeathNext = 0, countOfGenerations = 1;
+	int countOfDeathPrevious = 0, countOfDeathNext = 0, countOfGenerations = 0;
 	while (countOfGenerations < GENERAIONS && countOfDeathPrevious >= countOfDeathNext)
 	{
 		countOfGenerations++;
 		countOfDeathPrevious = countOfDeathNext;
 		countOfDeathNext = zombieAttack(k1, k2, k3);
-		evolution(k1, k2, k3);
+		if (amountOfZombies >= 5)
+		{
+			evolution(k1, k2, k3);
+		}
+		if (amountOfZombies <= 0)
+		{
+			break;
+		}
 	}
 	if (countOfDeathPrevious > countOfDeathNext)
 	{
