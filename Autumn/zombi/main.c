@@ -37,9 +37,16 @@ int main()
 {
 	int i = 0;
 	int x, y, kolzombi;
+	while (i==0)
+	{
 	printf("Enter two numbers: the size of the square of the field and the number of zombies\n");
 	scanf("%d%d", &x, &kolzombi);
 	y = x;
+	double alina = sqrt((x*y) / 1000);
+	if (alina <= 0) printf("so many people. try again\n"); 
+	else i = 1;
+	}
+
 	int kolzombinew = kolzombi;
 
 	//массивы структур зомби и людей
@@ -60,6 +67,7 @@ int main()
 			pole[i][j] = -1;
 	}
 	////////////////////////////////////////////////////////////////////////
+	
 	int period = sqrt((x*y) / 1000);
 	//расставить 1000 человек.
 	int k = 0;
