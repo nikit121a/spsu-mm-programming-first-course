@@ -1,119 +1,102 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct Node {
+typedef struct Node
+{
+	char key[10];
+	char value[10];
+	struct Node *next;
+} node;
+
+typedef struct HashTable
+{
+	node **table;
 	int key;
+	int val;
+	int size;
+	int *length;
 	struct Node *next;    // следующа€ вершина               
-} Node;
+} hashTable;
 
-Node **hashTable;
+void init(hashTable *h, int size)
+{
+	h->size = size;
+	h->table = (node**)malloc(sizeof(node*) * h->size);
+	h->length = (int*)malloc(sizeof(int) * h->size);
+	for (int i = 0; i < size; i++)
+		h->table[i] = (node*)malloc(sizeof(node));
+}
 
-int hash(int key) {
+int hash(int key)
+{
 	return (key % 101);
 }
 
-// отводит пам€ть под новый узел и вставл€ет его в таблицу
-Node *insertNode(int key) {
-	Node *p=NULL, *p0=NULL;
-	int bucket;
-	// вставка вершины в начало списка
-	bucket = hash(key);
-	if ((p = (Node*) malloc(sizeof(Node))) == 0)
+void inserthash(hashTable *h, int *key, int *value);
+newhash(hashTable *h)
+{
+	hashTable nh;
+	init(&nh, h->size);
+	for (int i = 0; i < h->size; i++)
 	{
-		printf("пам€ть (insertNode)\n");
-		return NULL;
+		inserthash(&nh, h->table[i]->key, h->table[i]->value);
 	}
-	p0 = hashTable[bucket];
-	hashTable[bucket] = p;
-	p->next = p0;
+	h = &nh;
+	return;
+}
+
+
+void *findhash(hashTable *h, int *key)
+{
+		node *p;
+		p = h->table[hash(key)];
+		do {
+			if ((p->key) == key) return p;
+			else p = p->next;
+		} while (p != NULL);
+	return -1;
+}
+
+// отводит пам€ть под новый узел и вставл€ет его в таблицу
+void inserthash(hashTable *h, int *key, int *value)
+{
+	hashTable *p;
+	int bucket = hash(key);
+	p = (hashTable*)malloc(sizeof(hashTable));
 	p->key = key;
-	free(p0);
-	return p;
+	p->val = value;
+	p->next = NULL;
+	h->table[bucket] = p;
+	h->length[bucket]++;
+	if (h->length[bucket] > 5)
+	{
+		newhash(h);
+		return;
+	}
 }
 
 //функци€ удалени€ вершины из таблицы
-Node *deleteNode(int key) {
-	Node *p = NULL, *p0 = NULL;
-	int bucket;
-	//поиск
-	p0 = 0;
-	bucket = hash(key);
-	p = hashTable[bucket];
-	while (p && !((p->key) == key)) {
-		p0 = p;
-		p = p->next;
-	}
-	if (!p) return;
-
-	if (p0)
-		p0->next = p->next;
-	else
-		hashTable[bucket] = p->next;
-
-	free(p);
-	return 1;
-}
-
-
-
-// поиск
-	Node *findNode(int key) {
-		Node *p = NULL;
-	p = hashTable[hash(key)];
-	if ((p->key) == key)
-	{
-		p = p->next;
-	return p; 
-	}
-	else  //если ключ не найден
- 	{
-		return NULL;
-	}
-}
-
-int main() 
+void deletehash(hashTable *h, int key)
 {
-	int i, *a, maxnum;
-	printf("%s\n", "¬ведите количество элементов"); 
-	scanf("%d", &maxnum);
-
-	//a = new int[maxnum];
-	if ((a = malloc(maxnum * sizeof(*a))) == 0)
+	hashTable *p;
+	if (findhash(key, &p))
 	{
-		printf("пам€ть  (a)\n");
-		return NULL;
+		int bucket = hash(key);
+		h->table[bucket] = p->next;
+		free(p);
 	}
+}
 
-	if ((hashTable = malloc(101 * sizeof(Node *))) == 0)
-	{
-		printf("пам€ть  (hashTable)\n");
-		return NULL;
-	}
 
-	for (i = 0; i < 101; i++)
-		hashTable[i] = NULL;
 
-	// генераци€ массива
-	for (i = 0; i < maxnum; i++)
-	{
-		a[i] = rand();
-	}
-
-	// заполнение хеш-таблицы элементами массива
-	for (i = 0; i < maxnum; i++) 
-	{
-		insertNode(i);
-	}
-
-	// поиск элементов массива по хеш-таблице
-	printf("%s\n", "¬ведите поиск");
-	scanf("%d", &i);
-	printf("%d\n",  findNode(a[i]));
-
-	printf("%s\n", "¬ведите удаление");
-	scanf("%d", &i);
-	deleteNode(a[i]);
-	maxnum--;
-
+int main()
+{
+	hashTable hash;
+	int size = 6;
+	init(&hash, size);
+	inserthash(&hash, 5, 6);
+	findhash(&hash, 6);
+	deletehash(&hash, 5);
+	
 	return 0;
 }
