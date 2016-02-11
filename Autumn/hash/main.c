@@ -3,8 +3,8 @@
 
 typedef struct Node
 {
-	char key[10];
-	char value[10];
+	char key;
+	char value;
 	struct Node *next;
 } node;
 
@@ -32,7 +32,8 @@ int hash(int key)
 	return (key % 101);
 }
 
-void inserthash(hashTable *h, int *key, int *value);
+void *inserthash(hashTable *h, int *key, int *value);
+
 newhash(hashTable *h)
 {
 	hashTable nh;
@@ -46,47 +47,55 @@ newhash(hashTable *h)
 }
 
 
-void *findhash(hashTable *h, int *key)
+void *findhash(hashTable *h, int key)
 {
-		node *p;
-		p = h->table[hash(key)];
-		do {
-			if ((p->key) == key) return p;
-			else p = p->next;
-		} while (p != NULL);
+	node *p;
+	int bucket = hash(key);
+	p = h->table[bucket];
+	while (p != NULL)
+	{
+		if ((p->key) == key) return p;
+		else p = p->next;
+	}
 	return -1;
 }
 
 // отводит память под новый узел и вставляет его в таблицу
-void inserthash(hashTable *h, int *key, int *value)
+void *inserthash(hashTable *h, int *key, int *value)
 {
-	hashTable *p;
 	int bucket = hash(key);
-	p = (hashTable*)malloc(sizeof(hashTable));
-	p->key = key;
-	p->val = value;
-	p->next = NULL;
-	h->table[bucket] = p;
+	h->table[bucket]->value = value;
+	h->table[bucket]->next = NULL;
+	h->table[bucket]->key = key;
 	h->length[bucket]++;
 	if (h->length[bucket] > 5)
 	{
+		h->size++;
 		newhash(h);
 		return;
-	}
+	} 
+	return h->table[bucket];
 }
 
 //функция удаления вершины из таблицы
-void deletehash(hashTable *h, int key)
+void *deletehash(hashTable *h, int key)
 {
-	hashTable *p;
-	if (findhash(key, &p))
-	{
-		int bucket = hash(key);
-		h->table[bucket] = p->next;
-		free(p);
-	}
+	int bucket = hash(key);
+	h->table[bucket]->key = NULL;
+	h->table[bucket]->next = NULL;
+	h->table[bucket]->value = NULL;
+	h->length[bucket]--;
+	return h->table[bucket];
 }
 
+void deletehashtable(hashTable *h)
+{
+	for (int i = 0; i < h->size; i++)
+		free(h->table[i]);
+	free(h->table);
+	free(h->length);
+	return;
+}
 
 
 int main()
@@ -94,9 +103,14 @@ int main()
 	hashTable hash;
 	int size = 6;
 	init(&hash, size);
-	inserthash(&hash, 5, 6);
-	findhash(&hash, 6);
-	deletehash(&hash, 5);
-	
+	node *p = inserthash(&hash, 5, 6);
+	printf("insert key %d and value %d \n", p->key, p->value);
+	p = findhash(&hash, 5);
+	printf("find for key 5 value %d \n", p->value);
+	p = deletehash(&hash, 5);
+	printf("delete for key 5. Now key %d and value  %d \n",  p->key, p->value);
+	deletehashtable(&hash);
+	printf("delete all");
+
 	return 0;
 }
