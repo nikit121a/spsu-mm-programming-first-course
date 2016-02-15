@@ -115,13 +115,16 @@ int main()
 			//любовь зомби k  и k*2. их замен€ют дети, характеристики которых берутс€ у двух сильнейших вирусов предыдущей итерации
 			for (int k = 0; k < floor(kolzombi / 2); k++)
 			{
-				int randomlove = rand() % 2 + 1;
-				TheThing[population[k* randomlove]].life = life;
-				TheThing[population[k * randomlove]].life = life2;
-				TheThing[population[k * randomlove]].virus = virus;
-				TheThing[population[k * randomlove]].virus = virus2;
-				TheThing[population[k * randomlove]].life = radius;
-				TheThing[population[k * randomlove]].radius = radius2;
+
+				int randomlove = rand() % 1;
+				if (randomlove == 0)	TheThing[population[k]].life = life;
+				else	TheThing[population[k]].life = life2;
+				int randomlove = rand() % 1;
+				if (randomlove == 0)		TheThing[population[k]].virus = virus;
+				else	TheThing[population[k]].virus = virus2;
+				int randomlove = rand() % 1;
+				if (randomlove == 0)		TheThing[population[k]].life = radius;
+				else	TheThing[population[k]].radius = radius2;
 			}
 
 			//мутаци€
@@ -135,7 +138,7 @@ int main()
 			for (int k = 1; k < floor(kolzombi / 2); k++)
 			{
 				int strength1 = TheThing[population[k]].life + TheThing[population[k]].virus + TheThing[population[k]].radius;
-				int strength2 = TheThing[population[k * 2]].life + TheThing[population[k * 2]].virus + TheThing[population[k* 2]].radius;
+				int strength2 = TheThing[population[k * 2]].life + TheThing[population[k * 2]].virus + TheThing[population[k * 2]].radius;
 				if (strength1 > strength2)
 				{
 					TheThing[population[k * 2]].life = TheThing[population[k]].life;
