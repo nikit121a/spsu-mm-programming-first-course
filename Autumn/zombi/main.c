@@ -112,16 +112,16 @@ int main()
 		//генетика!!
 		if (createvirus < 0)
 		{
-			//любовь зомби. их замен€ют дети
+			//любовь зомби k  и k*2. их замен€ют дети, характеристики которых берутс€ у двух сильнейших вирусов предыдущей итерации
 			for (int k = 0; k < floor(kolzombi / 2); k++)
 			{
-
-				TheThing[population[i]].life = life;
-				TheThing[population[i * 2]].life = life2;
-				TheThing[population[i]].virus = virus;
-				TheThing[population[i * 2]].virus = virus2;
-				TheThing[population[i]].life = radius;
-				TheThing[population[i * 2]].radius = radius2;
+				int randomlove = rand() % 2 + 1;
+				TheThing[population[k* randomlove]].life = life;
+				TheThing[population[k * randomlove]].life = life2;
+				TheThing[population[k * randomlove]].virus = virus;
+				TheThing[population[k * randomlove]].virus = virus2;
+				TheThing[population[k * randomlove]].life = radius;
+				TheThing[population[k * randomlove]].radius = radius2;
 			}
 
 			//мутаци€
@@ -134,19 +134,19 @@ int main()
 			//это просто селекци€, выживает сильнейший
 			for (int k = 1; k < floor(kolzombi / 2); k++)
 			{
-				int strength1 = TheThing[population[i]].life + TheThing[population[i]].virus + TheThing[population[i]].radius;
-				int strength2 = TheThing[population[i * 2]].life + TheThing[population[i * 2]].virus + TheThing[population[i * 2]].radius;
+				int strength1 = TheThing[population[k]].life + TheThing[population[k]].virus + TheThing[population[k]].radius;
+				int strength2 = TheThing[population[k * 2]].life + TheThing[population[k * 2]].virus + TheThing[population[k* 2]].radius;
 				if (strength1 > strength2)
 				{
-					TheThing[population[i * 2]].life = TheThing[population[i]].life;
-					TheThing[population[i * 2]].virus = TheThing[population[i]].life;
-					TheThing[population[i * 2]].radius = TheThing[population[i]].life;
+					TheThing[population[k * 2]].life = TheThing[population[k]].life;
+					TheThing[population[k * 2]].virus = TheThing[population[k]].life;
+					TheThing[population[i * 2]].radius = TheThing[population[k]].life;
 				}
 				else
 				{
-					TheThing[population[i]].life = TheThing[population[i * 2]].life;
-					TheThing[population[i]].virus = TheThing[population[i * 2]].life;
-					TheThing[population[i]].radius = TheThing[population[i * 2]].life;
+					TheThing[population[k]].life = TheThing[population[k * 2]].life;
+					TheThing[population[k]].virus = TheThing[population[k * 2]].life;
+					TheThing[population[k]].radius = TheThing[population[k * 2]].life;
 				}
 			}
 		}
