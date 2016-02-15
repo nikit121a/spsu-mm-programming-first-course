@@ -113,7 +113,7 @@ int main()
 		if (createvirus < 0)
 		{
 			//любовь зомби k  и k*2. их замен€ют дети, характеристики которых берутс€ у двух сильнейших вирусов предыдущей итерации
-			for (int k = 0; k < floor(kolzombi / 2); k++)
+			for (int k = 0; k < kolzombi; k++)
 			{
 
 				int randomlove = rand() % 1;
