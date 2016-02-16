@@ -158,13 +158,12 @@ int main()
 
 
 		int	endpole = 0;
-		int kolpeopleitiration = 0, kolpeopleitiration2 = 0, itiratoin = -1, itiratoin2 = -1;
-		//игра началась
+		int kolpeopleitiration = 1000, kolpeopleitiration2 = 0, itiratoin = -1, itiratoin2 = -1;
+		//игра началас
 
 		for (int zom = 0; zom < kolzombi; zom++)
 		{
-			kolzombi = kolzombinew;
-			kolhuman = 1000 - kolzombinew;
+			
 			for (i = 0; i < 1000; i++)
 			{
 				// если зомби
@@ -178,7 +177,7 @@ int main()
 				}
 			}
 
-			while (kolhuman > 0 && kolzombi > 0)
+			for (int simulationitiration = 0; simulationitiration < 50; simulationitiration++)
 			{
 				for (i = 0; i < 1000; i++)
 				{
@@ -248,12 +247,12 @@ int main()
 				}
 				return 0;
 			}
-			if (kolzombi <= 0)
+			else
 			{
 				//2 лучших вируса
-				if (kolpeopleitiration < kolhuman)
+				if (kolpeopleitiration > kolhuman)
 
-					if (kolpeopleitiration2 < kolhuman)
+					if (kolpeopleitiration2 > kolhuman)
 					{
 						kolpeopleitiration2 = kolhuman;
 						itiratoin2 = population[zom];
@@ -277,8 +276,11 @@ int main()
 				radius2 = TheThingcopy[itiratoin].radius;
 
 			}
+
+			kolzombi = kolzombinew;
+			kolhuman = 1000 - kolzombinew;
 		}
 
-		return 0;
 	}
+		return 0;
 }
