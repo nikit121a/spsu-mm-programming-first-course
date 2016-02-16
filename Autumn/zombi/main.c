@@ -49,6 +49,8 @@ int main()
 
 	int kolzombinew = kolzombi;
 
+	TheThing *TheThingcopy;
+	TheThingcopy = malloc(28 * 1000);
 	//массивы структур зомби и людей
 	// int * 7 элементов структуры thething
 	TheThing *TheThing;
@@ -119,10 +121,10 @@ int main()
 				int randomlove = rand() % 1;
 				if (randomlove == 0)	TheThing[population[k]].life = life;
 				else	TheThing[population[k]].life = life2;
-				int randomlove = rand() % 1;
+				randomlove = rand() % 1;
 				if (randomlove == 0)		TheThing[population[k]].virus = virus;
 				else	TheThing[population[k]].virus = virus2;
-				int randomlove = rand() % 1;
+				randomlove = rand() % 1;
 				if (randomlove == 0)		TheThing[population[k]].life = radius;
 				else	TheThing[population[k]].radius = radius2;
 			}
@@ -159,8 +161,7 @@ int main()
 		int kolpeopleitiration = 0, kolpeopleitiration2 = 0, itiratoin = -1, itiratoin2 = -1;
 		//игра началась
 
-		TheThing *TheThingcopy;
-		TheThingcopy = malloc(28 * 1000);
+
 
 
 		for (int zom = 0; zom < kolzombi; zom++)
@@ -281,3 +282,4 @@ int main()
 
 		return 0;
 	}
+}
