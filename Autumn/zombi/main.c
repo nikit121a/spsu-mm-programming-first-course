@@ -180,7 +180,7 @@ int main()
 								if (k < 0)	k = 0;
 								if (j < 0)	j = 0;
 								if (pole[j][k] != -1 && TheThing[pole[j][k]].health != 0 && pole[j][k] != i)
-									imunityvirus = TheThing[pole[j][k]].health - TheThing[i].virus;
+									imunityvirus = TheThing[pole[j][k]].health - TheThing[population[zom]].virus;
 								else imunityvirus = -1;
 								if (imunityvirus >= 0)
 									TheThing[pole[j][k]].health -= imunityvirus;
