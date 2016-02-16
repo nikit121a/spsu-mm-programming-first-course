@@ -159,19 +159,37 @@ int main()
 		int kolpeopleitiration = 0, kolpeopleitiration2 = 0, itiratoin = -1, itiratoin2 = -1;
 		//игра началась
 
+		TheThing *TheThingcopy;
+		TheThingcopy = malloc(28 * 1000);
+
+
 		for (int zom = 0; zom < kolzombi; zom++)
 		{
+			for (i = 0; i < 1000; i++)
+			{
+				// если зомби
+				if (TheThing[i].health == 0)
+				{
+					TheThingcopy[i] = TheThing[population[zom]];
+				}
+				else
+				{
+					TheThingcopy[i] = TheThing[i];
+				}
+			}
+
 			while (kolhuman > 0 && kolzombi > 0)
 			{
 				for (i = 0; i < 1000; i++)
 				{
 					// если зомби
-					if (TheThing[i].health == 0)
+					if (TheThingcopy[i].health == 0)
 					{
-						for (int j = TheThing[population[zom]].x - TheThing[population[zom]].radius; j <= TheThing[population[zom]].x + TheThing[population[zom]].radius; j++)
+						for (int j = TheThingcopy[i].x - TheThingcopy[i].radius; j <= TheThingcopy[i].x + TheThingcopy[i].radius; j++)
 						{
+							//радиус
 							if (endpole != 0) break;
-							for (int k = TheThing[population[zom]].y - TheThing[population[zom]].radius; k <= TheThing[population[zom]].y + TheThing[population[zom]].radius; k++)
+							for (int k = TheThingcopy[i].y - TheThingcopy[i].radius; k <= TheThingcopy[i].y + TheThingcopy[i].radius; k++)
 							{
 								//заражаем соседей
 								endpole = 0;
@@ -179,34 +197,35 @@ int main()
 								if (j >= x) { j = x - 1;  endpole = 1; }
 								if (k < 0)	k = 0;
 								if (j < 0)	j = 0;
-								if (pole[j][k] != -1 && TheThing[pole[j][k]].health != 0 && pole[j][k] != i)
-									imunityvirus = TheThing[pole[j][k]].health - TheThing[population[zom]].virus;
+								if (pole[j][k] != -1 && TheThingcopy[pole[j][k]].health != 0 && pole[j][k] != i)
+									imunityvirus = TheThingcopy[pole[j][k]].health - TheThingcopy[i].virus;
 								else imunityvirus = -1;
 								if (imunityvirus >= 0)
-									TheThing[pole[j][k]].health -= imunityvirus;
+									TheThingcopy[pole[j][k]].health -= imunityvirus;
 								//превращаем их в зомби
-								if (TheThing[pole[j][k]].health <= 0)
+								if (TheThingcopy[pole[j][k]].health <= 0)
 								{
 									kolzombi++;
 									kolhuman--;
-									zombiskill(TheThing, pole[j][k], k1, k2, k3);
+									zombiskill(TheThingcopy, pole[j][k], k1, k2, k3);
 								}
 								if (endpole != 0) break;
 							}
+							TheThingcopy[i].life--;
 						}
 					}//конец зомби
 					//люди, если здоровье минус - мёртв.
 					else
 					{
 						//увеличиваем здоровье
-						if (TheThing[i].health > 0 && TheThing[i].health <= 95)
+						if (TheThingcopy[i].health > 0 && TheThingcopy[i].health <= 95)
 						{
-							TheThing[i].health += 5;
-							if (TheThing[i].health > 100) TheThing[i].health = 100;
+							TheThingcopy[i].health += 5;
+							if (TheThingcopy[i].health > 100) TheThingcopy[i].health = 100;
 						}
-						if (TheThing[i].health < 0 && TheThing[i].health != -100)
+						if (TheThingcopy[i].health < 0 && TheThingcopy[i].health != -100)
 						{
-							TheThing[i].health = -100;
+							TheThingcopy[i].health = -100;
 							kolzombi--;
 						}
 					}
@@ -250,16 +269,15 @@ int main()
 				printf("zombie killing. creating a new virus\n");
 				int createvirus = -1;
 				//характеристики этих зомби
-				life = TheThing[itiratoin2].life;
-				virus = TheThing[itiratoin2].virus;
-				radius = TheThing[itiratoin2].radius;
-				life2 = TheThing[itiratoin].life;
-				virus2 = TheThing[itiratoin].virus;
-				radius2 = TheThing[itiratoin].radius;
+				life = TheThingcopy[itiratoin2].life;
+				virus = TheThingcopy[itiratoin2].virus;
+				radius = TheThingcopy[itiratoin2].radius;
+				life2 = TheThingcopy[itiratoin].life;
+				virus2 = TheThingcopy[itiratoin].virus;
+				radius2 = TheThingcopy[itiratoin].radius;
 
 			}
 		}
-	}
 
-	return 0;
-}
+		return 0;
+	}
