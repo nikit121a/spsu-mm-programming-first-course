@@ -161,11 +161,10 @@ int main()
 		int kolpeopleitiration = 0, kolpeopleitiration2 = 0, itiratoin = -1, itiratoin2 = -1;
 		//игра началась
 
-
-
-
 		for (int zom = 0; zom < kolzombi; zom++)
 		{
+			kolzombi = kolzombinew;
+			kolhuman = 1000 - kolzombinew;
 			for (i = 0; i < 1000; i++)
 			{
 				// если зомби
