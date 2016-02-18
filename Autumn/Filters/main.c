@@ -6,79 +6,92 @@
 
 BITMAPFILEHEADER bitmapFileHeader;
 BITMAPINFOHEADER bitmapInfoHeader;
-RGBQUAD **bitecolor;
 
-//	printf("%d %d %d %d ", bitecolor[i][j].rgbBlue, bitecolor[i][j].rgbGreen, bitecolor[i][j].rgbRed, bitecolor[i][j].rgbReserved);
+typedef struct _Color
+{
+	BYTE rgbtRed;
+	BYTE rgbtGreen;
+	BYTE rgbtBlue;
+} Color;
+
+char *buf;
+Color **bitecolor;
+Color **bitecolorcopy;
+
+
+createbmp(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Color **bitecolor)
+{
+	FILE *newfile = fopen("a.bmp", "wb");
+	if (newfile == NULL)
+	{
+		return NULL;
+	}
+	fwrite(&bitmapFileHeader, sizeof(BITMAPFILEHEADER), 1, newfile);
+	fwrite(&bitmapInfoHeader, sizeof(BITMAPINFOHEADER), 1, newfile);
+	buf = malloc(sizeof(char) * 4);
+	for (int i = 0; i < bitmapInfoHeader.biHeight; i++)
+	{
+		for (int j = 0; j < bitmapInfoHeader.biWidth; j++)
+		{
+			fwrite(&(bitecolor[i][j]), sizeof(bitecolor[i][j]), 1, newfile);
+			if (bitmapInfoHeader.biBitCount == 32) fwrite(&buf, 1, 1, newfile);
+		}
+		if (bitmapInfoHeader.biBitCount == 24) fwrite(buf, sizeof(BYTE), bitmapInfoHeader.biWidth % 4, newfile);
+	}
+
+	fclose(newfile);
+}
+
+grey(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Color **bitecolor)
+{
+	int R, G, B, Y;
+
+	for (int i = 0; i < bitmapInfoHeader.biHeight; i++)
+		for (int j = 0; j < bitmapInfoHeader.biWidth; j++)
+		{
+			R = bitecolor[i][j].rgbtRed;
+			G = bitecolor[i][j].rgbtGreen;
+			B = bitecolor[i][j].rgbtBlue;
+			Y = (R + G + B) / 3;
+			bitecolor[i][j].rgbtRed = Y;
+			bitecolor[i][j].rgbtGreen = Y;
+			bitecolor[i][j].rgbtBlue = Y;
+		}
+	createbmp(bitmapInfoHeader, bitmapFileHeader, bitecolor);
+}
 
 int comp(const void *i, const void *j)
 {
 	return *(int *)i - *(int *)j;
 }
-
-median(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, RGBQUAD **bitecolor)
+median(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Color **bitecolor)
 {
 	int R[9], B[9], G[9];
 
-	for (int a = 1; a < bitmapInfoHeader.biWidth - 1; a++)
-		for (int b = 1; b < bitmapInfoHeader.biHeight - 1; b++)
+	for (int a = 1; a < bitmapInfoHeader.biHeight - 1; a++)
+		for (int b = 1; b < bitmapInfoHeader.biWidth - 1; b++)
 		{
 			int k = 0;
 			for (int i = -1; i < 2; i++)
 				for (int j = -1; j < 2; j++)
 				{
-					R[k] = bitecolor[i + a][j + b].rgbRed;
-					G[k] = bitecolor[i + a][j + b].rgbGreen;
-					B[k] = bitecolor[i + a][j + b].rgbBlue;
+					R[k] = bitecolor[i + a][j + b].rgbtRed;
+					G[k] = bitecolor[i + a][j + b].rgbtGreen;
+					B[k] = bitecolor[i + a][j + b].rgbtBlue;
 					k++;
 				}
 			qsort(R, 9, sizeof(int), comp);
 			qsort(G, 9, sizeof(int), comp);
 			qsort(B, 9, sizeof(int), comp);
-			bitecolor[a][b].rgbBlue = B[4];
-			bitecolor[a][b].rgbRed = R[4];
-			bitecolor[a][b].rgbGreen = G[4];
+			bitecolorcopy[a][b].rgbtBlue = B[4];
+			bitecolorcopy[a][b].rgbtRed = R[4];
+			bitecolorcopy[a][b].rgbtGreen = G[4];
 		}
-
-
-	createbmp(bitmapInfoHeader, bitmapFileHeader, bitecolor);
-
+	createbmp(bitmapInfoHeader, bitmapFileHeader, bitecolorcopy);
 }
 
-grey(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, RGBQUAD **bitecolor)
+gauss(int r, BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Color **bitecolor)
 {
-	int R, G, B, Y;
-
-	for (int i = 0; i < bitmapInfoHeader.biWidth; i++)
-		for (int j = 0; j < bitmapInfoHeader.biHeight; j++)
-		{
-			R = bitecolor[i][j].rgbRed;
-			G = bitecolor[i][j].rgbGreen;
-			B = bitecolor[i][j].rgbBlue;
-			Y = 0.299 * R + 0.587 * G + 0.114 * B;
-			bitecolor[i][j].rgbRed = Y;
-			bitecolor[i][j].rgbGreen = Y;
-			bitecolor[i][j].rgbBlue = Y;
-		}
-	createbmp(bitmapInfoHeader, bitmapFileHeader, bitecolor);
-}
-
-RGBQUAD **newbitecolor;
-gauss(int r, BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, RGBQUAD **bitecolor)
-{
-
-	newbitecolor = (RGBQUAD **)malloc(sizeof(RGBQUAD*) * bitmapInfoHeader.biWidth);
-	for (int j = 0; j < bitmapInfoHeader.biWidth; j++)
-		newbitecolor[j] = (RGBQUAD *)malloc(sizeof(RGBQUAD) * bitmapInfoHeader.biHeight);
-
-
-	for (int i = 0; i < bitmapInfoHeader.biWidth; i++)
-		for (int j = 0; j < bitmapInfoHeader.biHeight; j++)
-		{
-			newbitecolor[i][j].rgbRed = bitecolor[i][j].rgbRed;
-			newbitecolor[i][j].rgbGreen = bitecolor[i][j].rgbGreen;
-			newbitecolor[i][j].rgbBlue = bitecolor[i][j].rgbBlue;
-		}
-
 
 	double gaussArray[5][5], div = 0;
 	int pixelPosX, pixelPosY;
@@ -100,17 +113,15 @@ gauss(int r, BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeade
 					pixelPosX = x + j - 2;
 					pixelPosY = y + i - 2;
 
-					byte red = newbitecolor[pixelPosY][pixelPosX].rgbRed;
-					byte green = newbitecolor[pixelPosY][pixelPosX].rgbGreen;
-					byte blue = newbitecolor[pixelPosY][pixelPosX].rgbBlue;
+					byte red = bitecolorcopy[pixelPosY][pixelPosX].rgbtRed;
+					byte green = bitecolorcopy[pixelPosY][pixelPosX].rgbtGreen;
+					byte blue = bitecolorcopy[pixelPosY][pixelPosX].rgbtBlue;
 
-					double kernelVal = gaussArray[i][j];
+					rSum += red * gaussArray[i][j];
+					gSum += green *gaussArray[i][j];
+					bSum += blue * gaussArray[i][j];
 
-					rSum += red * kernelVal;
-					gSum += green * kernelVal;
-					bSum += blue * kernelVal;
-
-					kSum += kernelVal;
+					kSum += gaussArray[i][j];
 				}
 
 			if (kSum <= 0) kSum = 1;
@@ -127,133 +138,110 @@ gauss(int r, BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeade
 			if (bSum < 0) bSum = 0;
 			if (bSum > 255) bSum = 255;
 
-			newbitecolor[y][x].rgbRed = (byte)rSum;
-			newbitecolor[y][x].rgbGreen = (byte)gSum;
-			newbitecolor[y][x].rgbBlue = (byte)bSum;
+			bitecolorcopy[y][x].rgbtRed = (byte)rSum;
+			bitecolorcopy[y][x].rgbtGreen = (byte)gSum;
+			bitecolorcopy[y][x].rgbtBlue = (byte)bSum;
 		}
 
-	createbmp(bitmapInfoHeader, bitmapFileHeader, newbitecolor);
+	createbmp(bitmapInfoHeader, bitmapFileHeader, bitecolorcopy);
 }
 
-createbmp(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, RGBQUAD **bitecolor)
-{
-	FILE *newfile = fopen("a.bmp", "wb");
 
-	fwrite(&bitmapFileHeader, sizeof(BITMAPFILEHEADER), 1, newfile);
-	fwrite(&bitmapInfoHeader, sizeof(BITMAPINFOHEADER), 1, newfile);
-//	fseek(newfile, bitmapFileHeader.bfOffBits, SEEK_SET);
-	//int padding = (-((bitmapInfoHeader.biWidth * bitmapInfoHeader.biBitCount / 8) % 4) + 4) % 4;
-//	char *buf = malloc(sizeof(char) * 4);
-	for (int i = 0; i < bitmapInfoHeader.biWidth; i++)
-	{
-	//	fwrite(buf, sizeof(char), padding, newfile);
-		for (int j = 0; j < bitmapInfoHeader.biHeight; j++)
-			fwrite(&(bitecolor[i][j]), sizeof(bitecolor[i][j]), 1, newfile);
-	}
 
-	fclose(newfile);
-}
-
-sobelx(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, RGBQUAD **bitecolor)
+sobelx(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Color **bitecolor)
 {
 	int g[3][3] = { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
+	int gy[3][3] = { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
 
+	int newry = 0, newgy = 0, newby = 0;
+	int rcy, gcy, bcy;
 	int newr = 0, newg = 0, newb = 0;
 	int rc, gc, bc;
-	for (int i = 1; i < bitmapInfoHeader.biWidth - 1; i++)
-		for (int j = 1; j < bitmapInfoHeader.biHeight - 1; j++)
-		{
 
+	for (int i = 1; i < bitmapInfoHeader.biHeight - 1; i++)
+		for (int j = 1; j < bitmapInfoHeader.biWidth - 1; j++)
+		{
+			newry = 0; newgy = 0; newby = 0;
+			rcy = 0; gcy = 0; bcy = 0;
 			newr = 0; newg = 0; newb = 0;
-			rc = 0; gc = 0; bc = 0;
 
 			for (int wi = -1; wi < 2; wi++)
 				for (int hw = -1; hw < 2; hw++)
 				{
-					rc = bitecolor[i + hw][j + wi].rgbRed;
-					newr += g[wi + 1][hw + 1] * rc;
+					rcy = bitecolor[i + hw][j + wi].rgbtRed;
+					bcy = bitecolor[i + hw][j + wi].rgbtBlue;
+					gcy = bitecolor[i + hw][j + wi].rgbtGreen;
 
-					gc = bitecolor[i + hw][j + wi].rgbGreen;
-					newg += g[wi + 1][hw + 1] * gc;
-
-					bc = bitecolor[i + hw][j + wi].rgbBlue;
-					newb += g[wi + 1][hw + 1] * bc;
+					newry += gy[wi + 1][hw + 1] * rcy ;
+					newgy += gy[wi + 1][hw + 1] * gcy ;
+					newby += gy[wi + 1][hw + 1] * bcy;
+					newr += g[wi + 1][hw + 1] * rcy ;
+					newg += g[wi + 1][hw + 1] * gcy;
+					newb += g[wi + 1][hw + 1] * bcy ;
 				}
 
-			bitecolor[i][j].rgbBlue = newb;
-			bitecolor[i][j].rgbGreen = newg;
-			bitecolor[i][j].rgbRed = newr;
+			int sum = sqrt((newb + newg + newr)*(newb + newg + newr) + (newby + newgy + newry) * (newby + newgy + newry));
+
+			if (sum <= 101)
+			{
+				bitecolorcopy[i][j].rgbtBlue = 0;
+				bitecolorcopy[i][j].rgbtGreen = 0;
+				bitecolorcopy[i][j].rgbtRed = 0;
+			}
+			else
+			{
+				bitecolorcopy[i][j].rgbtBlue = 255;
+				bitecolorcopy[i][j].rgbtGreen = 255;
+				bitecolorcopy[i][j].rgbtRed = 255;
+			}
 		}
 
-	createbmp(bitmapInfoHeader, bitmapFileHeader, bitecolor);
-}
-
-sobely(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, RGBQUAD **bitecolor)
-{
-	int g[3][3] = { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
-
-	int newr = 0, newg = 0, newb = 0;
-	int rc, gc, bc;
-	for (int i = 1; i < bitmapInfoHeader.biWidth - 1; i++)
-		for (int j = 1; j < bitmapInfoHeader.biHeight - 1; j++)
-		{
-
-			newr = 0; newg = 0; newb = 0;
-			rc = 0; gc = 0; bc = 0;
-
-			for (int wi = -1; wi < 2; wi++)
-				for (int hw = -1; hw < 2; hw++)
-				{
-					rc = bitecolor[i + hw][j + wi].rgbRed;
-					newr += g[wi + 1][hw + 1] * rc;
-
-					gc = bitecolor[i + hw][j + wi].rgbGreen;
-					newg += g[wi + 1][hw + 1] * gc;
-
-					bc = bitecolor[i + hw][j + wi].rgbBlue;
-					newb += g[wi + 1][hw + 1] * bc;
-				}
-
-			bitecolor[i][j].rgbBlue = newb;
-			bitecolor[i][j].rgbGreen = newg;
-			bitecolor[i][j].rgbRed = newr;
-		}
-
-	createbmp(bitmapInfoHeader, bitmapFileHeader, bitecolor);
+	createbmp(bitmapInfoHeader, bitmapFileHeader, bitecolorcopy);
 }
 
 int main()
 {
 	FILE *file;
-	file = fopen("unicorn32.bmp", "r");
+	file = fopen("tank.bmp", "rb");
+
+	if (file == NULL)
+	{
+		return NULL;
+	}
 
 	fread(&bitmapFileHeader, sizeof(BITMAPFILEHEADER), 1, file);
 	fread(&bitmapInfoHeader, sizeof(BITMAPINFOHEADER), 1, file);
 
-	bitecolor = (RGBQUAD **)malloc(sizeof(RGBQUAD*) * bitmapInfoHeader.biWidth);
-	for (int j = 0; j < bitmapInfoHeader.biWidth; j++)
-		bitecolor[j] = (RGBQUAD *)malloc(sizeof(RGBQUAD) * bitmapInfoHeader.biHeight);
+	bitecolor = (Color **)malloc(sizeof(Color*) * bitmapInfoHeader.biHeight);
+	for (int j = 0; j < bitmapInfoHeader.biHeight; j++)
+		bitecolor[j] = (Color *)malloc(sizeof(Color) * bitmapInfoHeader.biWidth);
 
-	//fseek(file, bitmapFileHeader.bfOffBits, SEEK_SET);
-	//int padding = (-((bitmapInfoHeader.biWidth * bitmapInfoHeader.biBitCount / 8) % 4) + 4) % 4;
-//	char *buf = malloc(sizeof(char) * 4);
-	for (int i = 0; i < bitmapInfoHeader.biWidth; i++)
+	bitecolorcopy = (Color **)malloc(sizeof(Color*) * bitmapInfoHeader.biHeight);
+	for (int j = 0; j < bitmapInfoHeader.biHeight; j++)
+		bitecolorcopy[j] = (Color *)malloc(sizeof(Color) * bitmapInfoHeader.biWidth);
+	buf = malloc(sizeof(char) * 4);
+	for (int i = 0; i < bitmapInfoHeader.biHeight; i++)
 	{
-	//	fread(buf, sizeof(char), padding, file);
-		for (int j = 0; j < bitmapInfoHeader.biHeight; j++)
+		for (int j = 0; j < bitmapInfoHeader.biWidth; j++)
+		{
 			fread(&(bitecolor[i][j]), sizeof(bitecolor[i][j]), 1, file);
+			if (bitmapInfoHeader.biBitCount == 32) fread(&buf, 1, 1, file);
+			bitecolorcopy[i][j] = bitecolor[i][j];
+		}
+		if (bitmapInfoHeader.biBitCount == 24) fread(buf, sizeof(BYTE), bitmapInfoHeader.biWidth % 4, file);
 	}
 
-	createbmp(bitmapInfoHeader, bitmapFileHeader, bitecolor);
+
+
+	//createbmp(bitmapInfoHeader, bitmapFileHeader, bitecolor);
 
 	//grey(bitmapInfoHeader, bitmapFileHeader, bitecolor);
 
 	//median(bitmapInfoHeader, bitmapFileHeader, bitecolor);
 
-	//gauss(5, bitmapInfoHeader, bitmapFileHeader, bitecolor);
+	//gauss(10, bitmapInfoHeader, bitmapFileHeader, bitecolor);
 
 	//sobelx(bitmapInfoHeader, bitmapFileHeader, bitecolor);
 
-	//sobely(bitmapInfoHeader, bitmapFileHeader, bitecolor);
 	return 0;
 }
