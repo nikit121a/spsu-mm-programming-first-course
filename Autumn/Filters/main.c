@@ -176,9 +176,9 @@ sobelx(char close[], BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapF
 					newry += gy[wi + 1][hw + 1] * rcy;
 					newgy += gy[wi + 1][hw + 1] * gcy;
 					newby += gy[wi + 1][hw + 1] * bcy;
-				//	newr += g[wi + 1][hw + 1] * rcy;
-				//	newg += g[wi + 1][hw + 1] * gcy;
-				//	newb += g[wi + 1][hw + 1] * bcy;
+					//	newr += g[wi + 1][hw + 1] * rcy;
+					//	newg += g[wi + 1][hw + 1] * gcy;
+					//	newb += g[wi + 1][hw + 1] * bcy;
 				}
 
 			int sum = sqrt((newb + newg + newr)*(newb + newg + newr) + (newby + newgy + newry) * (newby + newgy + newry));
@@ -225,9 +225,9 @@ sobely(char close[], BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapF
 					bcy = bitecolor[i + hw][j + wi].rgbtBlue;
 					gcy = bitecolor[i + hw][j + wi].rgbtGreen;
 
-				//	newry += gy[wi + 1][hw + 1] * rcy;
-				//	newgy += gy[wi + 1][hw + 1] * gcy;
-				//	newby += gy[wi + 1][hw + 1] * bcy;
+					//	newry += gy[wi + 1][hw + 1] * rcy;
+					//	newgy += gy[wi + 1][hw + 1] * gcy;
+					//	newby += gy[wi + 1][hw + 1] * bcy;
 					newr += g[wi + 1][hw + 1] * rcy;
 					newg += g[wi + 1][hw + 1] * gcy;
 					newb += g[wi + 1][hw + 1] * bcy;
@@ -252,26 +252,24 @@ sobely(char close[], BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapF
 	createbmp(close, bitmapInfoHeader, bitmapFileHeader, bitecolorcopy);
 }
 
-int main()
+int main(int argc, char *argv[])
 {
 	FILE *file;
-	char open[81], close[81]; 
-	int filters;
-	printf("Enter the path to the BMP, which you plan to change\n");
-	gets(open);
+	char *open, *close, *filters;
+	//printf("Enter the path to the BMP, which you plan to change\n");
+	open = argv[1];
 	file = fopen(open, "rb");
 
 	if (file == NULL)
 	{
 		printf("Error name\n");
 	}
-	
-	printf("Enter the path to the BMP, where you plan to save the image\n");
-	gets(close);
 
-	printf("Select filter: 0 - median, 1 - gauss, 2 - sobelx,3 -  sobely or 4 - grey\n");
-	scanf("%i",&filters);
+	//printf("Select filter: 0 - median, 1 - gauss, 2 - sobelx,3 -  sobely or 4 - grey\n");
+	filters = argv[2];
 
+	//printf("Enter the path to the BMP, where you plan to save the image\n");
+	close = argv[3];
 
 	fread(&bitmapFileHeader, sizeof(BITMAPFILEHEADER), 1, file);
 	fread(&bitmapInfoHeader, sizeof(BITMAPINFOHEADER), 1, file);
@@ -297,15 +295,15 @@ int main()
 
 	//createbmp(close, bitmapInfoHeader, bitmapFileHeader, bitecolor);
 
-	if (filters  == 4) grey(close,bitmapInfoHeader, bitmapFileHeader, bitecolor);
+	if (filters[0] == '4') grey(close, bitmapInfoHeader, bitmapFileHeader, bitecolor);
 
-	if (filters == 0) median(close, bitmapInfoHeader, bitmapFileHeader, bitecolor);
+	if (filters[0] == '0') median(close, bitmapInfoHeader, bitmapFileHeader, bitecolor);
 
-	if (filters == 1) gauss(close, 10, bitmapInfoHeader, bitmapFileHeader, bitecolor);
+	if (filters[0] == '1') gauss(close, 10, bitmapInfoHeader, bitmapFileHeader, bitecolor);
 
-	if (filters == 2) sobelx(close, bitmapInfoHeader, bitmapFileHeader, bitecolor);
+	if (filters[0] == '2') sobelx(close, bitmapInfoHeader, bitmapFileHeader, bitecolor);
 
-	if (filters == 3) sobely(close, bitmapInfoHeader, bitmapFileHeader, bitecolor);
+	if (filters[0] == '3') sobely(close, bitmapInfoHeader, bitmapFileHeader, bitecolor);
 
 	return 0;
 }
