@@ -19,12 +19,13 @@ Color **bitecolor;
 Color **bitecolorcopy;
 
 
-createbmp(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Color **bitecolor)
+createbmp(char close[], BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Color **bitecolor)
 {
-	FILE *newfile = fopen("a.bmp", "wb");
+	FILE *newfile = fopen(close, "wb");
 	if (newfile == NULL)
 	{
-		return NULL;
+		printf("Error name\n");
+		return 0;
 	}
 	fwrite(&bitmapFileHeader, sizeof(BITMAPFILEHEADER), 1, newfile);
 	fwrite(&bitmapInfoHeader, sizeof(BITMAPINFOHEADER), 1, newfile);
@@ -42,7 +43,7 @@ createbmp(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, 
 	fclose(newfile);
 }
 
-grey(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Color **bitecolor)
+grey(char close[], BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Color **bitecolor)
 {
 	int R, G, B, Y;
 
@@ -57,14 +58,14 @@ grey(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Color
 			bitecolor[i][j].rgbtGreen = Y;
 			bitecolor[i][j].rgbtBlue = Y;
 		}
-	createbmp(bitmapInfoHeader, bitmapFileHeader, bitecolor);
+	createbmp(close, bitmapInfoHeader, bitmapFileHeader, bitecolor);
 }
 
 int comp(const void *i, const void *j)
 {
 	return *(int *)i - *(int *)j;
 }
-median(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Color **bitecolor)
+median(char close[], BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Color **bitecolor)
 {
 	int R[9], B[9], G[9];
 
@@ -87,10 +88,10 @@ median(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Col
 			bitecolorcopy[a][b].rgbtRed = R[4];
 			bitecolorcopy[a][b].rgbtGreen = G[4];
 		}
-	createbmp(bitmapInfoHeader, bitmapFileHeader, bitecolorcopy);
+	createbmp(close, bitmapInfoHeader, bitmapFileHeader, bitecolorcopy);
 }
 
-gauss(int r, BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Color **bitecolor)
+gauss(char close[], int r, BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Color **bitecolor)
 {
 
 	double gaussArray[5][5], div = 0;
@@ -143,12 +144,12 @@ gauss(int r, BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeade
 			bitecolorcopy[y][x].rgbtBlue = (byte)bSum;
 		}
 
-	createbmp(bitmapInfoHeader, bitmapFileHeader, bitecolorcopy);
+	createbmp(close, bitmapInfoHeader, bitmapFileHeader, bitecolorcopy);
 }
 
 
 
-sobelx(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Color **bitecolor)
+sobelx(char close[], BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Color **bitecolor)
 {
 	int g[3][3] = { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
 	int gy[3][3] = { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
@@ -172,12 +173,12 @@ sobelx(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Col
 					bcy = bitecolor[i + hw][j + wi].rgbtBlue;
 					gcy = bitecolor[i + hw][j + wi].rgbtGreen;
 
-					newry += gy[wi + 1][hw + 1] * rcy ;
-					newgy += gy[wi + 1][hw + 1] * gcy ;
+					newry += gy[wi + 1][hw + 1] * rcy;
+					newgy += gy[wi + 1][hw + 1] * gcy;
 					newby += gy[wi + 1][hw + 1] * bcy;
-					newr += g[wi + 1][hw + 1] * rcy ;
-					newg += g[wi + 1][hw + 1] * gcy;
-					newb += g[wi + 1][hw + 1] * bcy ;
+				//	newr += g[wi + 1][hw + 1] * rcy;
+				//	newg += g[wi + 1][hw + 1] * gcy;
+				//	newb += g[wi + 1][hw + 1] * bcy;
 				}
 
 			int sum = sqrt((newb + newg + newr)*(newb + newg + newr) + (newby + newgy + newry) * (newby + newgy + newry));
@@ -196,18 +197,81 @@ sobelx(BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Col
 			}
 		}
 
-	createbmp(bitmapInfoHeader, bitmapFileHeader, bitecolorcopy);
+	createbmp(close, bitmapInfoHeader, bitmapFileHeader, bitecolorcopy);
+}
+
+
+sobely(char close[], BITMAPINFOHEADER bitmapInfoHeader, BITMAPFILEHEADER bitmapFileHeader, Color **bitecolor)
+{
+	int g[3][3] = { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
+	int gy[3][3] = { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
+
+	int newry = 0, newgy = 0, newby = 0;
+	int rcy, gcy, bcy;
+	int newr = 0, newg = 0, newb = 0;
+	int rc, gc, bc;
+
+	for (int i = 1; i < bitmapInfoHeader.biHeight - 1; i++)
+		for (int j = 1; j < bitmapInfoHeader.biWidth - 1; j++)
+		{
+			newry = 0; newgy = 0; newby = 0;
+			rcy = 0; gcy = 0; bcy = 0;
+			newr = 0; newg = 0; newb = 0;
+
+			for (int wi = -1; wi < 2; wi++)
+				for (int hw = -1; hw < 2; hw++)
+				{
+					rcy = bitecolor[i + hw][j + wi].rgbtRed;
+					bcy = bitecolor[i + hw][j + wi].rgbtBlue;
+					gcy = bitecolor[i + hw][j + wi].rgbtGreen;
+
+				//	newry += gy[wi + 1][hw + 1] * rcy;
+				//	newgy += gy[wi + 1][hw + 1] * gcy;
+				//	newby += gy[wi + 1][hw + 1] * bcy;
+					newr += g[wi + 1][hw + 1] * rcy;
+					newg += g[wi + 1][hw + 1] * gcy;
+					newb += g[wi + 1][hw + 1] * bcy;
+				}
+
+			int sum = sqrt((newb + newg + newr)*(newb + newg + newr) + (newby + newgy + newry) * (newby + newgy + newry));
+
+			if (sum <= 101)
+			{
+				bitecolorcopy[i][j].rgbtBlue = 0;
+				bitecolorcopy[i][j].rgbtGreen = 0;
+				bitecolorcopy[i][j].rgbtRed = 0;
+			}
+			else
+			{
+				bitecolorcopy[i][j].rgbtBlue = 255;
+				bitecolorcopy[i][j].rgbtGreen = 255;
+				bitecolorcopy[i][j].rgbtRed = 255;
+			}
+		}
+
+	createbmp(close, bitmapInfoHeader, bitmapFileHeader, bitecolorcopy);
 }
 
 int main()
 {
 	FILE *file;
-	file = fopen("tank.bmp", "rb");
+	char open[81], close[81]; 
+	int filters;
+	printf("Enter the path to the BMP, which you plan to change\n");
+	gets(open);
+	file = fopen(open, "rb");
 
 	if (file == NULL)
 	{
-		return NULL;
+		printf("Error name\n");
 	}
+	
+	printf("Enter the path to the BMP, where you plan to save the image\n");
+	gets(close);
+
+	printf("Select filter: 0 - median, 1 - gauss, 2 - sobelx,3 -  sobely or 4 - grey\n");
+	scanf("%i",&filters);
+
 
 	fread(&bitmapFileHeader, sizeof(BITMAPFILEHEADER), 1, file);
 	fread(&bitmapInfoHeader, sizeof(BITMAPINFOHEADER), 1, file);
@@ -231,17 +295,17 @@ int main()
 		if (bitmapInfoHeader.biBitCount == 24) fread(buf, sizeof(BYTE), bitmapInfoHeader.biWidth % 4, file);
 	}
 
+	//createbmp(close, bitmapInfoHeader, bitmapFileHeader, bitecolor);
 
+	if (filters  == 4) grey(close,bitmapInfoHeader, bitmapFileHeader, bitecolor);
 
-	//createbmp(bitmapInfoHeader, bitmapFileHeader, bitecolor);
+	if (filters == 0) median(close, bitmapInfoHeader, bitmapFileHeader, bitecolor);
 
-	//grey(bitmapInfoHeader, bitmapFileHeader, bitecolor);
+	if (filters == 1) gauss(close, 10, bitmapInfoHeader, bitmapFileHeader, bitecolor);
 
-	//median(bitmapInfoHeader, bitmapFileHeader, bitecolor);
+	if (filters == 2) sobelx(close, bitmapInfoHeader, bitmapFileHeader, bitecolor);
 
-	//gauss(10, bitmapInfoHeader, bitmapFileHeader, bitecolor);
-
-	//sobelx(bitmapInfoHeader, bitmapFileHeader, bitecolor);
+	if (filters == 3) sobely(close, bitmapInfoHeader, bitmapFileHeader, bitecolor);
 
 	return 0;
 }
